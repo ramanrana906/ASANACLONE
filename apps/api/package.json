@@ -15,6 +15,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@asanaClone/shared": "workspace:*",
     "@fastify/cors": "^11.3.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",

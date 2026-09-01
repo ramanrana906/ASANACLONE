@@ -8,7 +8,7 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
-import { z } from "zod";
+import { createBoardSchema } from "@asanaClone/shared";
 
 const app = Fastify({
   logger: true,
@@ -38,9 +38,7 @@ app.post(
   "/api/boards",
   {
     schema: {
-      body: z.object({
-        title: z.string().min(1, "title is required"),
-      }),
+      body: createBoardSchema,
     },
   },
   async (request, reply) => {

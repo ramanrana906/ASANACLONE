@@ -36,6 +36,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@asanaClone/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@fastify/cors':
         specifier: ^11.3.0
         version: 11.3.0
@@ -70,6 +73,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@asanaClone/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@tanstack/react-query':
         specifier: ^5.102.8
         version: 5.102.8(react@19.2.8)
@@ -110,6 +116,12 @@ importers:
       vite:
         specifier: ^8.2.2
         version: 8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(tsx@4.23.13)(yaml@2.9.0)
+
+  packages/shared:
+    dependencies:
+      zod:
+        specifier: ^4.5.4
+        version: 4.5.4
 
 packages:
 
