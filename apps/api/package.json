@@ -5,18 +5,27 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "fastify": "^5.12.1"
+    "@fastify/cors": "^11.3.0",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "fastify": "^5.12.1",
+    "fastify-type-provider-zod": "^7.0.0",
+    "postgres": "^3.4.9",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
-    "tsx": "^4.23.13",
-    "typescript": "~6.0.3"
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.13"
   }
 }
