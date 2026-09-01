@@ -27,6 +27,8 @@ A monorepo project management app.
                             Zod
 ```
 
+For a general reference on how a product like Asana is architected at scale (services, data model, background processing, integrations), see [docs/asana-architecture-reference.md](docs/asana-architecture-reference.md). Note that this describes the real Asana product conceptually — it is not a description of this repo.
+
 ## Project Structure
 
 - `apps/web` – React + Vite frontend
