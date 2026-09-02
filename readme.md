@@ -29,6 +29,8 @@ A monorepo project management app.
 
 For a general reference on how a product like Asana is architected at scale (services, data model, background processing, integrations), see [docs/asana-architecture-reference.md](docs/asana-architecture-reference.md). Note that this describes the real Asana product conceptually — it is not a description of this repo.
 
+This project is built feature-by-feature, in sprints. See [docs/sprint-backlog.md](docs/sprint-backlog.md) for the domain hierarchy and the ordered sprint plan.
+
 ## Project Structure
 
 - `apps/web` – React + Vite frontend
@@ -65,13 +67,16 @@ This starts Postgres on `localhost:5432` with the credentials defined in [docker
 
 ### 3. Configure environment variables
 
-Create `apps/api/.env`:
+Copy `apps/api/.env.example` to `apps/api/.env`:
 
 ```
 DATABASE_URL=postgresql://user:password@localhost:5432/asanaClone
 PORT=4002
 CORS_ORIGIN=http://localhost:5173
+JWT_SECRET=<generate with `openssl rand -hex 32`>
 ```
+
+`JWT_SECRET` signs the auth session cookie — required for signup/login to work.
 
 Copy `apps/web/.env.example` to `apps/web/.env`, and point it at the API port above:
 

@@ -1,14 +1,16 @@
 import "dotenv/config";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-import { db } from "./db";
-import { boards } from "./db/schema";
+import cookies from "@fastify/cookie";
+import jwt from "@fastify/jwt";
 import {
   serializerCompiler,
   validatorCompiler,
   type ZodTypeProvider,
 } from "fastify-type-provider-zod";
-import { createBoardSchema } from "@asanaClone/shared";
+import { authRoutes } from "./routes/auth";
+import { boardsRoutes } from "./routes/boards";
+import { healthRoutes } from "./routes/health";
 
 const app = Fastify({
   logger: true,
@@ -17,40 +19,32 @@ const app = Fastify({
 app.setValidatorCompiler(validatorCompiler);
 app.setSerializerCompiler(serializerCompiler);
 
+await app.register(cookies);
+
+await app.register(jwt, {
+  secret: process.env.JWT_SECRET!,
+  cookie: {
+    cookieName: "session",
+    signed: false,
+  },
+});
+
+app.decorate("authenticate", async (request, reply) => {
+  try {
+    await request.jwtVerify({ onlyCookie: true });
+  } catch {
+    return reply.status(401).send({ error: "Unauthorized" });
+  }
+});
+
 await app.register(cors, {
   origin: process.env.CORS_ORIGIN,
+  credentials: true,
 });
 
-app.get("/api/health", async () => {
-  return {
-    message: "API is working",
-  };
-});
-
-app.get("/api/db-health", async () => {
-  const rows = await db.select().from(boards);
-  return { ok: true, count: rows.length };
-});
-
-
-
-app.post(
-  "/api/boards",
-  {
-    schema: {
-      body: createBoardSchema,
-    },
-  },
-  async (request, reply) => {
-    const [board] = await db
-      .insert(boards)
-      .values({ title: request.body.title })
-      .returning();
-
-    return reply.status(201).send(board);
-  },
-);
-
+await app.register(authRoutes);
+await app.register(healthRoutes);
+await app.register(boardsRoutes);
 
 const port = Number(process.env.PORT) || 4002;
 
