@@ -73,10 +73,31 @@ Copy `apps/api/.env.example` to `apps/api/.env`:
 DATABASE_URL=postgresql://user:password@localhost:5432/asanaClone
 PORT=4002
 CORS_ORIGIN=http://localhost:5173
+APP_URL=http://localhost:5173
 JWT_SECRET=<generate with `openssl rand -hex 32`>
+COOKIE_SECRET=<generate with `openssl rand -hex 32`>
+ACCESS_TOKEN_TTL=15m
+REFRESH_TOKEN_TTL_DAYS=30
+RESEND_API_KEY=
+MAIL_FROM=Clearing <onboarding@resend.dev>
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=http://localhost:4002/api/auth/google/callback
 ```
 
-`JWT_SECRET` signs the auth session cookie — required for signup/login to work.
+Required for signup/login to work at all:
+- `JWT_SECRET` signs the access-token JWT.
+- `COOKIE_SECRET` signs the session and refresh-token cookies.
+
+Optional — the app runs fine locally without these, with reduced functionality:
+- `RESEND_API_KEY` — leave blank in dev; password-reset and verification emails are logged
+  to the API console instead of sent. Set it (a [Resend](https://resend.com) API key) to
+  actually send them.
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — leave blank to disable "Sign in with
+  Google" (the button still renders, but the flow fails at Google). To enable it, create an
+  OAuth client in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+  (type: Web application) with an authorized redirect URI matching
+  `GOOGLE_CALLBACK_URL` above, and paste the generated client ID/secret in.
 
 Copy `apps/web/.env.example` to `apps/web/.env`, and point it at the API port above:
 

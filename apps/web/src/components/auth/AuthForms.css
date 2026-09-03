@@ -1,0 +1,353 @@
+.auth-page {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(320px, 40%) 1fr;
+  min-height: 100svh;
+  background: var(--bg-soft);
+}
+
+.auth-page__form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+@media (max-width: 860px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 380px;
+  max-width: 100%;
+  text-align: left;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  box-shadow: var(--shadow);
+  animation: form-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes form-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.auth-form h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 25px;
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+
+.auth-form__intro {
+  font-size: 14px;
+  color: var(--text);
+  margin: -6px 0 0;
+  line-height: 1.5;
+}
+
+.auth-form__google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--text-h);
+  font-weight: 600;
+  font-size: 14.5px;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.auth-form__google:hover {
+  background: var(--bg-soft);
+}
+
+.auth-form__google:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.auth-form__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -4px 0;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.auth-form__divider::before,
+.auth-form__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.auth-form__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth-form__link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.auth-form__link:hover {
+  text-decoration: underline;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.auth-form input {
+  font: inherit;
+  font-size: 15px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-h);
+  width: 100%;
+  transition: border-color 0.15s ease;
+}
+
+.auth-form input:hover {
+  border-color: #c7cad0;
+}
+
+.auth-form input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.auth-form__password-field {
+  position: relative;
+  display: flex;
+}
+
+.auth-form__password-field input {
+  padding-right: 44px;
+}
+
+.auth-form__reveal {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.auth-form__reveal:hover {
+  color: var(--text-h);
+  background: var(--bg-soft);
+}
+
+.auth-form__reveal:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.auth-form button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.auth-form button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.auth-form button[type="submit"],
+.auth-form__primary-button {
+  margin-top: 6px;
+  padding: 12px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  font-size: 15px;
+  transition:
+    background 0.15s ease,
+    transform 0.1s ease;
+}
+
+.auth-form button[type="submit"]:hover:not(:disabled),
+.auth-form__primary-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.auth-form button[type="submit"]:active:not(:disabled),
+.auth-form__primary-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.auth-form button[type="submit"]:disabled,
+.auth-form__primary-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.auth-error {
+  font-size: 13.5px;
+  color: var(--error);
+  margin: 0;
+  background: rgba(208, 52, 44, 0.08);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.auth-error:focus-visible {
+  outline: 2px solid var(--error);
+  outline-offset: 2px;
+}
+
+.auth-switch {
+  font-size: 14px;
+  color: var(--text);
+  margin: 0;
+  text-align: center;
+}
+
+.auth-switch button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-switch button:hover {
+  text-decoration: underline;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.app-header__user {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-header__user p {
+  font-size: 14px;
+  color: var(--text);
+}
+
+.app-header button {
+  font: inherit;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-h);
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.app-header button:hover {
+  background: var(--bg-soft);
+}
+
+.app-header button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.verification-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 10px 24px;
+  background: var(--accent-bg);
+  color: var(--text-h);
+  font-size: 14px;
+  border-bottom: 1px solid var(--accent-border);
+}
+
+.verification-banner button {
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.verification-banner button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.verification-banner button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  background: var(--bg-soft);
+}
