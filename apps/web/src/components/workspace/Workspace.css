@@ -5,19 +5,20 @@
 .workspace-switcher__trigger {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 8px 10px;
-  border: 1px solid var(--border);
+  padding: 8px;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  background: var(--bg-soft);
-  color: var(--text-h);
+  background: none;
+  color: var(--rail-text);
   font: inherit;
-  font-weight: 600;
-  font-size: 14px;
   cursor: pointer;
   text-align: left;
+}
+
+.workspace-switcher__trigger:hover {
+  background: var(--rail-hover-bg);
 }
 
 .workspace-switcher__trigger:focus-visible {
@@ -25,17 +26,51 @@
   outline-offset: 1px;
 }
 
+.workspace-switcher__trigger--collapsed {
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.workspace-switcher__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  color: #fff;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.workspace-switcher__icon--sm {
+  width: 22px;
+  height: 22px;
+  font-size: 11px;
+  border-radius: 6px;
+}
+
 .workspace-switcher__name {
+  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
+  font-size: 14.5px;
+}
+
+.workspace-switcher__trigger > svg {
+  flex-shrink: 0;
+  color: var(--rail-text-dim);
 }
 
 .workspace-switcher__menu {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
-  width: 260px;
+  width: 270px;
   max-width: 90vw;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -51,9 +86,8 @@
 .workspace-switcher__item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 10px;
+  padding: 7px 8px;
   border: none;
   border-radius: var(--radius-sm);
   background: none;
@@ -66,6 +100,13 @@
 
 .workspace-switcher__item:hover {
   background: var(--bg-soft);
+}
+
+.workspace-switcher__item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .workspace-switcher__item--action {

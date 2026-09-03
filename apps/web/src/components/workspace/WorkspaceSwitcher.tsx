@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CaretUpDown, Check, Plus } from "@phosphor-icons/react";
 import { useWorkspaces } from "../../hooks/WorkspaceContext";
+import { colorForKey } from "../../lib/identity";
 
-export function WorkspaceSwitcher() {
+interface WorkspaceSwitcherProps {
+  collapsed?: boolean;
+}
+
+export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps) {
   const { workspaces, currentWorkspace, switchWorkspace, createWorkspace, isCreatePending } =
     useWorkspaces();
   const [open, setOpen] = useState(false);
@@ -34,14 +39,29 @@ export function WorkspaceSwitcher() {
     <div className="workspace-switcher" ref={rootRef}>
       <button
         type="button"
-        className="workspace-switcher__trigger"
+        className={
+          collapsed ? "workspace-switcher__trigger workspace-switcher__trigger--collapsed" : "workspace-switcher__trigger"
+        }
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
+        title={collapsed ? (currentWorkspace?.name ?? "Select workspace") : undefined}
       >
-        <span className="workspace-switcher__name">
-          {currentWorkspace?.name ?? "Select workspace"}
-        </span>
-        <CaretUpDown size={14} weight="bold" />
+        {currentWorkspace && (
+          <span
+            className="workspace-switcher__icon"
+            style={{ background: colorForKey(currentWorkspace.id) }}
+          >
+            {currentWorkspace.name.charAt(0).toUpperCase()}
+          </span>
+        )}
+        {!collapsed && (
+          <>
+            <span className="workspace-switcher__name">
+              {currentWorkspace?.name ?? "Select workspace"}
+            </span>
+            <CaretUpDown size={14} weight="bold" />
+          </>
+        )}
       </button>
 
       {open && (
@@ -56,7 +76,13 @@ export function WorkspaceSwitcher() {
                 setOpen(false);
               }}
             >
-              <span>{workspace.name}</span>
+              <span
+                className="workspace-switcher__icon workspace-switcher__icon--sm"
+                style={{ background: colorForKey(workspace.id) }}
+              >
+                {workspace.name.charAt(0).toUpperCase()}
+              </span>
+              <span className="workspace-switcher__item-name">{workspace.name}</span>
               {workspace.id === currentWorkspace?.id && <Check size={14} weight="bold" />}
             </button>
           ))}

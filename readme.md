@@ -78,6 +78,10 @@ JWT_SECRET=<generate with `openssl rand -hex 32`>
 COOKIE_SECRET=<generate with `openssl rand -hex 32`>
 ACCESS_TOKEN_TTL=15m
 REFRESH_TOKEN_TTL_DAYS=30
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=465
+SMTP_USER=
+SMTP_PASS=
 RESEND_API_KEY=
 MAIL_FROM=Clearing <onboarding@resend.dev>
 GOOGLE_CLIENT_ID=
@@ -90,9 +94,16 @@ Required for signup/login to work at all:
 - `COOKIE_SECRET` signs the session and refresh-token cookies.
 
 Optional — the app runs fine locally without these, with reduced functionality:
-- `RESEND_API_KEY` — leave blank in dev; password-reset and verification emails are logged
-  to the API console instead of sent. Set it (a [Resend](https://resend.com) API key) to
-  actually send them.
+- Mail sending tries SMTP first, then [Resend](https://resend.com), then falls back to
+  logging the email (including the link) to the API console — leave all of it blank in dev
+  if that's fine.
+  - `SMTP_USER` / `SMTP_PASS` — e.g. Gmail: `SMTP_USER` is your Gmail address, `SMTP_PASS` is
+    an **App Password** (not your normal password) generated at
+    [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) — requires
+    2-Step Verification enabled on the account first. Delivers to any recipient.
+  - `RESEND_API_KEY` — a [Resend](https://resend.com/api-keys) API key. Without a verified
+    domain, Resend's free tier only delivers to the email address your Resend account itself
+    uses — fine for testing the flow yourself, not for real recipients.
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — leave blank to disable "Sign in with
   Google" (the button still renders, but the flow fails at Google). To enable it, create an
   OAuth client in [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
@@ -129,6 +140,18 @@ root of the domain hierarchy (`Workspace > Project > Section > Task > Subtask`, 
 [docs/sprint-backlog.md](docs/sprint-backlog.md)). You'll be prompted to create one on first
 login; more can be created later from the workspace switcher in the sidebar. Settings
 (profile, account, emails, sessions) are reachable from the "Settings" link in the sidebar.
+
+Workspace membership is invite-based: from the "People" link in the sidebar, an admin can
+invite people by email (they get a link to `/accept-invite?token=...`) and manage roles
+(admin/member/guest). A workspace's creator is its owner and can't be demoted or removed.
+Inviting someone can also add them straight to specific projects.
+
+### 7. Create a project
+
+Inside a workspace, the main view is its **Projects** list — click "New project" to create
+one, then click into it. Each project has an Overview tab (status, description, and its own
+roles list — owner/editor/commenter) plus a tab bar for List/Board/Timeline/Dashboard/
+Calendar, which render as placeholders until their sprints land.
 
 ## Useful Scripts
 

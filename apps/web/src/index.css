@@ -30,6 +30,17 @@
   --radius-lg: 20px;
   --radius-pill: 999px;
 
+  /* Fixed dark chrome for the app nav rail — intentionally independent of
+     light/dark mode, so the rail/canvas contrast reads the same for every
+     viewer (a common SaaS nav pattern: dark chrome, light content canvas). */
+  --rail-bg: #211d1b;
+  --rail-bg-active: rgba(250, 90, 70, 0.16);
+  --rail-hover-bg: rgba(255, 255, 255, 0.06);
+  --rail-border: rgba(255, 255, 255, 0.08);
+  --rail-text: #b8ada5;
+  --rail-text-dim: #8a7d74;
+  --rail-text-active: #f5f0ec;
+
   font: 16px/150% var(--sans);
   letter-spacing: 0;
   color-scheme: light dark;

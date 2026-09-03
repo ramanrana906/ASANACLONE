@@ -199,70 +199,89 @@ Docs
 ## Sprint 4 tasks: Roles & invites
 
 Schema
-- [ ] Add a `workspace_members` table: `id`, `workspaceId` (FK), `userId` (FK), `role` enum
+- [x] Add a `workspace_members` table: `id`, `workspaceId` (FK), `userId` (FK), `role` enum
       (`admin`/`member`/`guest`), `createdAt`. Unique on `(workspaceId, userId)`.
-- [ ] Add an `invites` table: `id`, `workspaceId` (FK), `email`, `invitedBy` (FK → `users`),
+- [x] Add an `invites` table: `id`, `workspaceId` (FK), `email`, `invitedBy` (FK → `users`),
       `role` enum, `token`, `status` enum (`pending`/`accepted`/`expired`/`revoked`),
       `createdAt`, `expiresAt`. Kept separate from `workspace_members` since an invited email
       may not have an account yet.
-- [ ] Generate and run the DB migration.
+- [x] Generate and run the DB migration. (Included a data backfill: workspaces created before
+      this sprint had no membership row, so each existing owner gets one as `admin`.)
 
 Shared package
-- [ ] Add Zod schemas: `workspaceRoleSchema`, `inviteSchema` (emails array + role),
-      `acceptInviteSchema`.
+- [x] Add Zod schemas: `workspaceRoleSchema`, `inviteSchema` (emails array + role),
+      `acceptInviteSchema`. Also `workspaceMemberSchema`, `updateMemberRoleSchema`,
+      `pendingInviteSchema`, `acceptedInviteSchema`.
 
 API
-- [ ] `POST /api/workspaces/:id/invites` – create invite rows for a list of emails, send an
-      invite email (reuses Sprint 2's mailer).
-- [ ] `GET /api/workspaces/:id/invites` – list pending invites.
-- [ ] `POST /api/invites/:token/accept` – creates the `workspace_members` row, marks the
-      invite accepted.
-- [ ] `GET /api/workspaces/:id/members`.
-- [ ] `PATCH /api/workspaces/:id/members/:userId` / `DELETE /api/workspaces/:id/members/:userId`
-      – change role / remove member, gated by `requireRole("admin")`.
+- [x] `POST /api/workspaces/:id/invites` – create invite rows for a list of emails, send an
+      invite email (reuses Sprint 2's mailer). Skips anyone already a member; re-sends/renews
+      an existing pending invite for the same email instead of duplicating it.
+- [x] `GET /api/workspaces/:id/invites` – list pending invites.
+- [x] `POST /api/invites/:token/accept` – creates the `workspace_members` row, marks the
+      invite accepted. Rejects with a clear error if the logged-in account's email doesn't
+      match the invite's target email.
+- [x] `GET /api/workspaces/:id/members`.
+- [x] `PATCH /api/workspaces/:id/members/:userId` / `DELETE /api/workspaces/:id/members/:userId`
+      – change role / remove member, gated by an admin check scoped to that workspace's
+      membership (not the global `requireRole` decorator, which only covers the user's
+      site-wide role — workspace roles are per-workspace). The workspace owner's role can't be
+      changed and the owner can't be removed.
+- [x] `GET /api/workspaces` and `GET /api/workspaces/:id` now resolve via `workspace_members`
+      instead of `ownerId`, so accepted invitees actually see the workspace.
 
 Frontend
-- [ ] "Invite people" modal: email-address textarea + role select.
-- [ ] People/Team page: list of members with roles + pending invites.
-- [ ] Accept-invite landing page (from the emailed link).
-- [ ] Role change / remove-member controls for admins.
+- [x] "Invite people" modal: email-address textarea + role select.
+- [x] People/Team page: list of members with roles + pending invites. (Built as a modal, same
+      pattern as Settings, rather than a separate page — no router exists yet.)
+- [x] Accept-invite landing page (from the emailed link).
+- [x] Role change / remove-member controls for admins.
 
 Docs
-- [ ] Update the README with the invite flow.
+- [x] Update the README with the invite flow.
 
 ## Sprint 5 tasks: Projects
 
 Schema
-- [ ] Add a `projects` table: `id`, `workspaceId` (FK), `name`, `description` (nullable),
+- [x] Add a `projects` table: `id`, `workspaceId` (FK), `name`, `description` (nullable),
       `status` enum (`on_track`/`at_risk`/`off_track`, nullable), `ownerId` (FK → `users`),
       `createdAt`.
-- [ ] Add a `project_members` table: `id`, `projectId` (FK), `userId` (FK), `role` enum
+- [x] Add a `project_members` table: `id`, `projectId` (FK), `userId` (FK), `role` enum
       (`owner`/`editor`/`commenter`), `createdAt`.
-- [ ] Generate and run the DB migration.
+- [x] Generate and run the DB migration.
 
 Shared package
-- [ ] Add Zod schemas: `projectSchema`, `createProjectSchema`, `updateProjectSchema`,
-      `projectStatusSchema`, `projectRoleSchema`.
+- [x] Add Zod schemas: `projectSchema`, `createProjectSchema`, `updateProjectSchema`,
+      `projectStatusSchema`, `projectRoleSchema`. Also `projectMemberSchema`,
+      `addProjectMemberSchema`, `updateProjectStatusSchema`.
 
 API
-- [ ] `POST /api/workspaces/:id/projects` / `GET /api/workspaces/:id/projects` /
-      `GET /api/projects/:id` / `PATCH /api/projects/:id` / `DELETE /api/projects/:id`.
-- [ ] `PATCH /api/projects/:id/status`.
-- [ ] `POST /api/projects/:id/members` / `DELETE /api/projects/:id/members/:userId`.
-- [ ] Extend Sprint 4's invite endpoint to accept an optional `projectIds[]`, adding the
-      invitee to those projects once they accept.
+- [x] `POST /api/workspaces/:id/projects` / `GET /api/workspaces/:id/projects` /
+      `GET /api/projects/:id` / `PATCH /api/projects/:id` / `DELETE /api/projects/:id`. Access
+      is gated by workspace membership (any workspace member can view/create/edit; only the
+      project owner can delete). The creator is automatically added as an `owner`
+      `project_members` row.
+- [x] `PATCH /api/projects/:id/status`.
+- [x] `POST /api/projects/:id/members` / `DELETE /api/projects/:id/members/:userId`. The
+      target must already be a workspace member; the project owner can't be removed.
+- [x] Extend Sprint 4's invite endpoint to accept an optional `projectIds[]` (validated
+      against the workspace's actual projects), adding the invitee to those projects as an
+      `editor` once they accept.
 
 Frontend
-- [ ] Projects list page inside a workspace; create/delete project.
-- [ ] Project page shell with the Overview/List/Board/Timeline/Dashboard/Calendar tab bar
-      (only Overview is implemented this sprint — the rest render as placeholders until their
-      sprints land).
-- [ ] Overview tab: inline-editable description, status pill + "Set status" control, project
-      roles list ("Add member"), a placeholder "Milestones" section (built out in Sprint 9).
-- [ ] Extend the invite modal from Sprint 4 with an "Add to projects" chip picker.
+- [x] Projects list page inside a workspace; create/delete project. (Cards show name, status
+      dot + label, and a description preview.)
+- [x] Project page shell with the Overview/List/Board/Timeline/Dashboard/Calendar tab bar
+      (only Overview is implemented this sprint — the rest render as "coming in a later
+      sprint" placeholders).
+- [x] Overview tab: inline-editable description (autosaves on blur), status pill + "Set
+      status" control (On track/At risk/Off track, color-coded, clearable), project roles
+      list ("Add member" — picks from workspace members not yet on the project), a
+      placeholder "Milestones" section (built out in Sprint 9).
+- [x] Extend the invite modal from Sprint 4 with an "Add to projects" chip picker.
 
 Docs
-- [ ] Update the README with the project concept.
+- [x] Update the README with the project concept.
 
 ## Sprint 6 tasks: Sections & Board view
 

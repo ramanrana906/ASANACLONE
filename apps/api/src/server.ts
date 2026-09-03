@@ -18,6 +18,8 @@ import { boardsRoutes } from "./routes/boards";
 import { healthRoutes } from "./routes/health";
 import { usersRoutes } from "./routes/users";
 import { workspacesRoutes } from "./routes/workspaces";
+import { invitesRoutes } from "./routes/invites";
+import { projectsRoutes } from "./routes/projects";
 
 const app = Fastify({
   logger: true,
@@ -87,6 +89,8 @@ await app.register(healthRoutes);
 await app.register(boardsRoutes);
 await app.register(usersRoutes);
 await app.register(workspacesRoutes);
+await app.register(invitesRoutes);
+await app.register(projectsRoutes);
 
 const port = Number(process.env.PORT) || 4002;
 

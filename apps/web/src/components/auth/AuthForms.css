@@ -272,19 +272,63 @@
 }
 
 .app-sidebar {
-  width: 240px;
+  width: 264px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 16px 12px;
-  background: var(--bg);
-  border-right: 1px solid var(--border);
-  color: var(--text-h);
+  gap: 10px;
+  padding: 14px 10px;
+  background: var(--rail-bg);
+  border-right: 1px solid var(--rail-border);
+  color: var(--rail-text);
+  transition: width 0.15s ease;
+}
+
+.app-sidebar--collapsed {
+  width: 64px;
+  padding: 14px 8px;
+}
+
+.app-sidebar__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 2px;
+}
+
+.app-sidebar--collapsed .app-sidebar__top {
+  flex-direction: column;
+  gap: 10px;
 }
 
 .app-sidebar__logo {
-  padding: 0 2px;
+  color: var(--rail-text-active);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.app-sidebar__collapse-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--rail-text-dim);
+  cursor: pointer;
+}
+
+.app-sidebar__collapse-toggle:hover {
+  background: var(--rail-hover-bg);
+  color: var(--rail-text-active);
+}
+
+.app-sidebar__collapse-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .app-sidebar__spacer {
@@ -296,10 +340,14 @@
   flex-direction: column;
   gap: 8px;
   padding-top: 12px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--rail-border);
 }
 
-.app-sidebar__footer button {
+.app-sidebar__footer button,
+.app-sidebar__nav-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font: inherit;
   font-size: 14px;
   text-align: left;
@@ -307,33 +355,88 @@
   border: none;
   border-radius: var(--radius-sm);
   background: none;
-  color: var(--text-h);
+  color: var(--rail-text);
   cursor: pointer;
 }
 
-.app-sidebar__footer button:hover {
-  background: var(--bg-soft);
+.app-sidebar__footer button:hover,
+.app-sidebar__nav-button:hover {
+  background: var(--rail-hover-bg);
+  color: var(--rail-text-active);
 }
 
-.app-sidebar__footer button:focus-visible {
+.app-sidebar__footer button:focus-visible,
+.app-sidebar__nav-button:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
+}
+
+.app-sidebar__nav-button {
+  width: 100%;
+}
+
+.app-sidebar--collapsed .app-sidebar__footer button,
+.app-sidebar--collapsed .app-sidebar__nav-button,
+.app-sidebar--collapsed .workspace-switcher__trigger,
+.app-sidebar--collapsed .project-nav__list button,
+.app-sidebar--collapsed .project-nav__new {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .app-sidebar__user {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  padding: 4px 2px;
+  padding: 6px 2px;
 }
 
-.app-sidebar__user span {
+.app-sidebar--collapsed .app-sidebar__user {
+  justify-content: center;
+  padding: 6px 0;
+}
+
+.app-sidebar__user-name {
+  flex: 1;
+  min-width: 0;
   font-size: 13px;
-  color: var(--text);
+  font-weight: 500;
+  color: var(--rail-text-active);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.app-sidebar__user button {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0 !important;
+  border-radius: var(--radius-sm);
+  color: var(--rail-text-dim);
+}
+
+.app-sidebar__logout-collapsed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: 4px auto 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--rail-text-dim);
+  cursor: pointer;
+}
+
+.app-sidebar__logout-collapsed:hover {
+  background: var(--rail-hover-bg);
+  color: var(--rail-text-active);
 }
 
 .app-content {
@@ -385,4 +488,11 @@
   justify-content: center;
   padding: 40px 24px;
   background: var(--bg-soft);
+  overflow-y: auto;
+}
+
+.app-main--top {
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0;
 }
