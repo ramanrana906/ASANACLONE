@@ -7,12 +7,12 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   verifyEmailSchema,
-  type User,
 } from "@asanaClone/shared";
 import { db } from "../db";
 import { users } from "../db/schema";
 import { generateToken, hashToken } from "../lib/tokens";
 import { sendPasswordResetEmail, sendVerificationEmail } from "../lib/mailer";
+import { toPublicUser } from "../lib/users";
 import {
   issueSession,
   clearSessionCookies,
@@ -23,17 +23,6 @@ import {
 const APP_URL = process.env.APP_URL || "http://localhost:5173";
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
 const AUTH_RATE_LIMIT = { max: 5, timeWindow: "1 minute" };
-
-function toPublicUser(row: typeof users.$inferSelect): User {
-  return {
-    id: row.id,
-    email: row.email,
-    name: row.name,
-    role: row.role,
-    emailVerified: row.emailVerified,
-    createdAt: row.createdAt.toISOString(),
-  };
-}
 
 export const authRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
@@ -82,6 +71,9 @@ export const authRoutes: FastifyPluginAsyncZod = async (app) => {
       });
       if (!user || !user.passwordHash || !(await bcrypt.compare(password, user.passwordHash))) {
         return reply.status(401).send({ error: "Invalid email or password" });
+      }
+      if (user.deactivatedAt) {
+        return reply.status(403).send({ error: "This account has been deactivated" });
       }
 
       await issueSession(app, reply, user.id, request.headers["user-agent"]);

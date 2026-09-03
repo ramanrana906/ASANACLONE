@@ -16,6 +16,8 @@ import { users } from "./db/schema";
 import { authRoutes } from "./routes/auth";
 import { boardsRoutes } from "./routes/boards";
 import { healthRoutes } from "./routes/health";
+import { usersRoutes } from "./routes/users";
+import { workspacesRoutes } from "./routes/workspaces";
 
 const app = Fastify({
   logger: true,
@@ -62,6 +64,7 @@ app.decorate("requireRole", (...roles) => {
 await app.register(cors, {
   origin: process.env.CORS_ORIGIN,
   credentials: true,
+  methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
 });
 
 await app.register(oauth2, {
@@ -82,6 +85,8 @@ await app.register(oauth2, {
 await app.register(authRoutes);
 await app.register(healthRoutes);
 await app.register(boardsRoutes);
+await app.register(usersRoutes);
+await app.register(workspacesRoutes);
 
 const port = Number(process.env.PORT) || 4002;
 

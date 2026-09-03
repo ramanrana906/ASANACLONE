@@ -39,14 +39,14 @@ modes, not containers with their own data.
    essentials: multiple emails per user (one marked "preferred notification email"), "log out
    other sessions" (revoke every `sessions` row for the user except the current one — builds
    directly on Sprint 2's session table), and account deactivation/deletion.
-4. **Roles & invites** – an "Invite people" flow: an email-address list plus an optional
-   "Add to projects" picker so invitees land directly in specific projects, not just the
-   workspace. Workspace-scoped roles (admin/member/guest) and permission checks on workspace
-   actions.
+4. **Roles & invites** – an "Invite people" flow: invite by email with a workspace-scoped role
+   (admin/member/guest); pending invites tracked separately from membership until accepted.
+   Permission checks on workspace actions.
 5. **Projects** – nested under a workspace (`workspace_id` FK). CRUD API + UI to view
    projects inside a workspace, create/delete a project. Includes basic Overview-tab fields:
    `description` and a `status` enum (on track / at risk / off track) with a "Set status"
-   control, matching the real Overview tab.
+   control, matching the real Overview tab, plus per-project roles/membership. Extends
+   Sprint 4's invite modal with an "Add to projects" picker now that projects exist.
 6. **Sections & Board view** – `sections` table nested under a project (`project_id` FK,
    `position` for ordering), CRUD API, and the Board view UI: sections rendered as kanban
    columns with an "+ Add section" affordance. Replaces the old flat `boards` table entirely
@@ -158,6 +158,368 @@ Frontend
 
 Docs
 - [x] Update the README with the new env vars and auth setup steps.
+
+## Sprint 3 tasks: Workspaces
+
+Schema
+- [x] Add a `workspaces` table: `id`, `name`, `ownerId` (FK → `users`), `createdAt`.
+- [x] Extend `users` with profile fields: `photoUrl`, `pronouns`, `jobTitle`, `department`,
+      `aboutMe`, `outOfOfficeMessage`, `outOfOfficeUntil`, `deactivatedAt` (nullable —
+      deactivation marker).
+- [x] Add a `user_emails` table: `id`, `userId` (FK), `email` (unique), `isPreferred` (bool,
+      default false), `createdAt`.
+- [x] Generate and run the DB migration.
+
+Shared package
+- [x] Add Zod schemas: `workspaceSchema`, `createWorkspaceSchema`, `updateProfileSchema`,
+      `userEmailSchema`, `addEmailSchema`. Extend `userSchema` with the new profile fields.
+
+API
+- [x] `POST /api/workspaces` / `GET /api/workspaces` (mine) / `GET /api/workspaces/:id` /
+      `PATCH /api/workspaces/:id` / `DELETE /api/workspaces/:id`.
+- [x] `PATCH /api/users/me` – update profile fields.
+- [x] `POST /api/users/me/emails` / `DELETE /api/users/me/emails/:id` /
+      `PATCH /api/users/me/emails/:id/preferred`.
+- [x] `POST /api/auth/sessions/revoke-others` – revoke every `sessions` row for the caller
+      except the current one (builds on Sprint 2's session table).
+- [x] `POST /api/users/me/deactivate` and `DELETE /api/users/me` (account deletion, cascades).
+
+Frontend
+- [x] Workspace switcher in the sidebar + "Create workspace" modal.
+- [x] Gate the app behind having at least one workspace (create-first-workspace flow).
+- [x] Profile settings page: pronouns, job title, department, about me, out-of-office. (Photo
+      upload deferred — needs the file-storage infra that Sprint 8's attachments work adds;
+      `photoUrl` exists in the schema/API already, just no upload UI yet.)
+- [x] Account settings page: manage emails (add/remove/preferred), "Log out other sessions",
+      deactivate/delete account (with confirmation).
+
+Docs
+- [x] Update the README with the workspace concept and any new setup steps.
+
+## Sprint 4 tasks: Roles & invites
+
+Schema
+- [ ] Add a `workspace_members` table: `id`, `workspaceId` (FK), `userId` (FK), `role` enum
+      (`admin`/`member`/`guest`), `createdAt`. Unique on `(workspaceId, userId)`.
+- [ ] Add an `invites` table: `id`, `workspaceId` (FK), `email`, `invitedBy` (FK → `users`),
+      `role` enum, `token`, `status` enum (`pending`/`accepted`/`expired`/`revoked`),
+      `createdAt`, `expiresAt`. Kept separate from `workspace_members` since an invited email
+      may not have an account yet.
+- [ ] Generate and run the DB migration.
+
+Shared package
+- [ ] Add Zod schemas: `workspaceRoleSchema`, `inviteSchema` (emails array + role),
+      `acceptInviteSchema`.
+
+API
+- [ ] `POST /api/workspaces/:id/invites` – create invite rows for a list of emails, send an
+      invite email (reuses Sprint 2's mailer).
+- [ ] `GET /api/workspaces/:id/invites` – list pending invites.
+- [ ] `POST /api/invites/:token/accept` – creates the `workspace_members` row, marks the
+      invite accepted.
+- [ ] `GET /api/workspaces/:id/members`.
+- [ ] `PATCH /api/workspaces/:id/members/:userId` / `DELETE /api/workspaces/:id/members/:userId`
+      – change role / remove member, gated by `requireRole("admin")`.
+
+Frontend
+- [ ] "Invite people" modal: email-address textarea + role select.
+- [ ] People/Team page: list of members with roles + pending invites.
+- [ ] Accept-invite landing page (from the emailed link).
+- [ ] Role change / remove-member controls for admins.
+
+Docs
+- [ ] Update the README with the invite flow.
+
+## Sprint 5 tasks: Projects
+
+Schema
+- [ ] Add a `projects` table: `id`, `workspaceId` (FK), `name`, `description` (nullable),
+      `status` enum (`on_track`/`at_risk`/`off_track`, nullable), `ownerId` (FK → `users`),
+      `createdAt`.
+- [ ] Add a `project_members` table: `id`, `projectId` (FK), `userId` (FK), `role` enum
+      (`owner`/`editor`/`commenter`), `createdAt`.
+- [ ] Generate and run the DB migration.
+
+Shared package
+- [ ] Add Zod schemas: `projectSchema`, `createProjectSchema`, `updateProjectSchema`,
+      `projectStatusSchema`, `projectRoleSchema`.
+
+API
+- [ ] `POST /api/workspaces/:id/projects` / `GET /api/workspaces/:id/projects` /
+      `GET /api/projects/:id` / `PATCH /api/projects/:id` / `DELETE /api/projects/:id`.
+- [ ] `PATCH /api/projects/:id/status`.
+- [ ] `POST /api/projects/:id/members` / `DELETE /api/projects/:id/members/:userId`.
+- [ ] Extend Sprint 4's invite endpoint to accept an optional `projectIds[]`, adding the
+      invitee to those projects once they accept.
+
+Frontend
+- [ ] Projects list page inside a workspace; create/delete project.
+- [ ] Project page shell with the Overview/List/Board/Timeline/Dashboard/Calendar tab bar
+      (only Overview is implemented this sprint — the rest render as placeholders until their
+      sprints land).
+- [ ] Overview tab: inline-editable description, status pill + "Set status" control, project
+      roles list ("Add member"), a placeholder "Milestones" section (built out in Sprint 9).
+- [ ] Extend the invite modal from Sprint 4 with an "Add to projects" chip picker.
+
+Docs
+- [ ] Update the README with the project concept.
+
+## Sprint 6 tasks: Sections & Board view
+
+Schema
+- [ ] Add a `sections` table: `id`, `projectId` (FK), `name`, `position` (integer, for
+      ordering), `createdAt`.
+- [ ] Drop the old flat `boards` table entirely (retired in favor of `sections`).
+- [ ] Generate and run the DB migration.
+
+Shared package
+- [ ] Add Zod schemas: `sectionSchema`, `createSectionSchema`, `reorderSectionsSchema`.
+- [ ] Remove `boardSchema`/`createBoardSchema` (`packages/shared/src/board.ts`) and its export
+      from `index.ts`.
+
+API
+- [ ] `POST /api/projects/:id/sections` / `GET /api/projects/:id/sections` /
+      `PATCH /api/sections/:id` / `DELETE /api/sections/:id`.
+- [ ] `PATCH /api/projects/:id/sections/reorder`.
+- [ ] Remove `boardsRoutes` (`apps/api/src/routes/boards.ts`) and its registration in
+      `server.ts`.
+
+Frontend
+- [ ] Board tab: sections rendered as kanban columns, "+ Add section", drag-to-reorder
+      columns.
+
+Docs
+- [ ] Update the README noting the schema pivot away from a standalone `boards` table.
+
+## Sprint 7 tasks: Tasks (core)
+
+Schema
+- [ ] Add a `tasks` table: `id`, `title`, `description` (nullable), `completed` (bool,
+      default false), `completedAt` (nullable), `dueDateStart` (nullable), `dueDateEnd`
+      (nullable), `assigneeId` (FK → `users`, nullable), `createdBy` (FK → `users`),
+      `createdAt`.
+- [ ] Add a `task_projects` join table: `id`, `taskId` (FK), `projectId` (FK), `sectionId`
+      (FK), `position` (integer). Unique on `(taskId, projectId)` — this is how a task can
+      belong to multiple projects at once, each with its own section placement.
+- [ ] Generate and run the DB migration.
+
+Shared package
+- [ ] Add Zod schemas: `taskSchema`, `createTaskSchema`, `updateTaskSchema`,
+      `moveTaskSchema`.
+
+API
+- [ ] `POST /api/tasks` (title + initial `projectId`/`sectionId`).
+- [ ] `GET /api/projects/:id/tasks` – tasks grouped by section, for Board view.
+- [ ] `GET /api/tasks/:id` / `PATCH /api/tasks/:id` (title, description, assignee, due date,
+      completed) / `DELETE /api/tasks/:id`.
+- [ ] `PATCH /api/tasks/:id/move` – change section/position, or add/remove a project.
+
+Frontend
+- [ ] Task cards in Board columns (title, assignee avatar, due-date range); "+ Add task" per
+      section.
+- [ ] Drag-and-drop cards between/within sections, persisting position.
+- [ ] Task detail side panel: header ("Mark complete", assignee avatar + add, Share,
+      collapse/expand-to-full-page), title, Assignee row, Due date row (range picker),
+      Projects list (a chip per project + a section dropdown), Description textarea. Opens on
+      card click.
+
+Docs
+- [ ] Update the README with the task concept.
+
+## Sprint 8 tasks: Task collaboration
+
+Schema
+- [ ] Add a `task_followers` join table: `taskId` (FK), `userId` (FK), composite PK.
+- [ ] Add a `comments` table: `id`, `taskId` (FK), `authorId` (FK), `body`, `createdAt`,
+      `editedAt` (nullable).
+- [ ] Add an `activity_log` table: `id`, `taskId` (FK), `actorId` (FK), `type` (e.g.
+      `due_date_changed`, `assignee_changed`, `completed`, `section_changed`), `metadata`
+      (jsonb), `createdAt`.
+- [ ] Add an `attachments` table: `id`, `taskId` (FK), `uploadedBy` (FK), `fileName`,
+      `fileUrl`, `fileSize`, `mimeType`, `createdAt`.
+- [ ] Add a `messages` table (project-level): `id`, `projectId` (FK), `authorId` (FK), `body`,
+      `createdAt`, `editedAt` (nullable).
+- [ ] Generate and run the DB migration.
+
+Shared package
+- [ ] Add Zod schemas: `commentSchema`, `createCommentSchema`, `messageSchema`,
+      `createMessageSchema`.
+
+API
+- [ ] `POST /api/tasks/:id/comments` / `GET /api/tasks/:id/comments`.
+- [ ] `POST /api/tasks/:id/followers` / `DELETE /api/tasks/:id/followers/:userId`.
+- [ ] `POST /api/tasks/:id/attachments` (multipart upload, stored under a local `uploads/`
+      dir in dev) / `GET` / `DELETE`.
+- [ ] `GET /api/tasks/:id/activity`.
+- [ ] `POST /api/projects/:id/messages` / `GET /api/projects/:id/messages`.
+
+Frontend
+- [ ] Comments + activity feed at the bottom of the task panel (Oldest/Newest sort,
+      interleaved), with a composer box.
+- [ ] Attachments section (upload button, file list with download links).
+- [ ] Followers UI (avatar stack, add/remove self); assignee row gets a read-state indicator.
+- [ ] Messages tab on the project page: composer + chronological feed.
+
+Docs
+- [ ] Update the README: note attachment storage is local disk in dev, swap for
+      S3-compatible storage in production.
+
+## Sprint 9 tasks: Task depth
+
+Schema
+- [ ] Add `tasks.parentTaskId` — a nullable self-referential FK (subtasks) and
+      `tasks.isMilestone` (bool, default false).
+- [ ] Add a `task_dependencies` table: `id`, `taskId` (FK), `dependsOnTaskId` (FK). Unique on
+      `(taskId, dependsOnTaskId)`.
+- [ ] Add a `custom_fields` table: `id`, `projectId` (FK), `name`, `type` enum
+      (`single_select`/`multi_select`/`text`/`number`), `options` (jsonb — array of
+      `{label, color}` for select types), `createdAt`.
+- [ ] Add a `custom_field_values` table: `id`, `customFieldId` (FK), `taskId` (FK),
+      `projectId` (FK — since a multi-project task can have different values per project),
+      `value` (jsonb). Unique on `(customFieldId, taskId, projectId)`.
+- [ ] Generate and run the DB migration.
+
+Shared package
+- [ ] Add Zod schemas: `customFieldSchema`, `createCustomFieldSchema`,
+      `customFieldValueSchema`, `taskDependencySchema`.
+
+API
+- [ ] `POST /api/tasks/:id/subtasks` (creates a task with `parentTaskId` set) /
+      `GET /api/tasks/:id/subtasks`.
+- [ ] `POST /api/tasks/:id/dependencies` / `DELETE /api/tasks/:id/dependencies/:id`.
+- [ ] `POST /api/projects/:id/custom-fields` / `GET` / `PATCH` / `DELETE`.
+- [ ] `PUT /api/tasks/:id/custom-field-values` (scoped to a project).
+- [ ] `PATCH /api/tasks/:id/milestone` (toggle).
+
+Frontend
+- [ ] Subtasks section on the task panel: add input, checklist-style list with its own
+      completion state.
+- [ ] Dependencies row: "Add dependencies" picker (search tasks, blocking/waiting-on).
+- [ ] Custom fields table on the task panel: colored pills per field type, nested under each
+      project the task belongs to.
+- [ ] Project settings: custom-field admin UI (create/edit/reorder fields + options/colors).
+- [ ] Milestone diamond marker on cards/panel; wire up the Overview tab's "Milestones" list.
+
+Docs
+- [ ] Update the README with the task-depth concepts.
+
+## Sprint 10 tasks: More views
+
+Schema
+- [ ] None — List and Calendar are read/query modes over existing `sections`/`tasks` data.
+
+API
+- [ ] Extend `GET /api/projects/:id/tasks` with `view`/`sort`/`group` query params for List.
+- [ ] `GET /api/projects/:id/tasks?view=calendar&month=...` — date-range filtered for
+      Calendar.
+
+Frontend
+- [ ] List tab: sortable/groupable table (Name, Assignee, Due date, one column per custom
+      field), sections as collapsible row-groups.
+- [ ] Calendar tab: month grid, tasks rendered as date-range bars, "+ Add task" per day,
+      month navigation.
+- [ ] Project tab bar now has Board, List, and Calendar all live.
+
+Docs
+- [ ] Update the README.
+
+## Sprint 11 tasks: Search & personal views
+
+Schema
+- [ ] Add a `notifications` table: `id`, `userId` (FK), `type`, `taskId` (FK, nullable),
+      `projectId` (FK, nullable), `actorId` (FK, nullable), `read` (bool, default false),
+      `createdAt`.
+- [ ] Add a `notification_preferences` table: `id`, `userId` (FK), `category` enum
+      (`project`/`portfolio`/`goal`/`email`), `enabled` (bool, default true). Unique on
+      `(userId, category)`.
+- [ ] Add `users.doNotDisturbUntil` (nullable timestamp).
+- [ ] Generate and run the DB migration.
+
+Shared package
+- [ ] Add Zod schemas: `notificationSchema`, `notificationPreferenceSchema`.
+
+API
+- [ ] `GET /api/search?q=` (tasks + projects, simple `ILIKE` search to start).
+- [ ] `GET /api/me/tasks` – tasks assigned to the caller across projects ("My Tasks").
+- [ ] `GET /api/me/notifications` (grouped by day) / `PATCH /api/me/notifications/:id/read` /
+      `POST /api/me/notifications/archive-all`.
+- [ ] `PATCH /api/me/notification-preferences`.
+
+Frontend
+- [ ] Global search bar + results.
+- [ ] "My Tasks" page.
+- [ ] Inbox: Activity/Bookmarks/Archive/@Mentioned tabs, day-grouped notification list with
+      an unread indicator, "Archive all notifications".
+- [ ] Notification-preferences section in settings (per-category toggles + Do Not Disturb).
+
+Docs
+- [ ] Update the README.
+
+## Sprint 12 tasks: Automation
+
+Schema
+- [ ] Add an `automation_rules` table: `id`, `projectId` (FK), `name`, `trigger` (jsonb),
+      `action` (jsonb), `enabled` (bool, default true), `createdBy` (FK), `createdAt`.
+- [ ] Add a `project_templates` table: `id`, `workspaceId` (FK, nullable — null means
+      built-in), `name`, `description`, `sectionsSnapshot` (jsonb), `createdBy`, `createdAt`.
+- [ ] Add an `intake_forms` table: `id`, `projectId` (FK), `name`, `fieldsSchema` (jsonb),
+      `createdAt`.
+- [ ] Generate and run the DB migration.
+
+Shared package
+- [ ] Add Zod schemas: `automationRuleSchema`, `projectTemplateSchema`, `intakeFormSchema`.
+
+API
+- [ ] CRUD `/api/projects/:id/automation-rules`; a small rule-evaluation runner triggered on
+      relevant task events (move/complete/etc.) that checks matching rules and applies their
+      actions.
+- [ ] CRUD `/api/project-templates`; `POST /api/projects` accepts an optional
+      `templateId` to seed sections from a template.
+- [ ] CRUD `/api/projects/:id/intake-forms`; a public
+      `POST /api/intake-forms/:id/submit` that creates a task from form input.
+
+Frontend
+- [ ] Rule builder UI (trigger picker + action picker).
+- [ ] Template gallery in the "create project" flow.
+- [ ] Intake form builder + a public submission page.
+
+Docs
+- [ ] Update the README.
+
+## Sprint 13 tasks: Reporting
+
+Schema
+- [ ] Add a `goals` table: `id`, `workspaceId` (FK), `name`, `status` enum, `ownerId` (FK),
+      `dueDate` (nullable), `createdAt`.
+- [ ] Add a `project_goals` join table: `projectId` (FK), `goalId` (FK), composite PK.
+- [ ] Add a `portfolios` table: `id`, `workspaceId` (FK), `name`, `ownerId` (FK), `createdAt`.
+- [ ] Add a `portfolio_projects` join table: `portfolioId` (FK), `projectId` (FK), composite
+      PK.
+- [ ] Add a `dashboard_widgets` table: `id`, `projectId` (FK), `type` enum
+      (`stat_tile`/`bar_chart`/`donut_chart`/`area_chart`), `config` (jsonb), `position`,
+      `createdAt`.
+- [ ] Generate and run the DB migration.
+
+Shared package
+- [ ] Add Zod schemas: `goalSchema`, `portfolioSchema`, `dashboardWidgetSchema`.
+
+API
+- [ ] CRUD `/api/goals`, CRUD `/api/portfolios`.
+- [ ] `POST`/`DELETE /api/projects/:id/goals`, `/api/projects/:id/portfolios` (connect/
+      disconnect — surfaced on the Overview tab).
+- [ ] `GET /api/projects/:id/dashboard/stats` – completed/incomplete/overdue/total counts and
+      chart data, computed from `tasks`.
+- [ ] CRUD `/api/projects/:id/dashboard/widgets`.
+- [ ] `GET /api/workspaces/:id/workload` – tasks-per-assignee aggregate.
+
+Frontend
+- [ ] Dashboard tab: widget grid, "+ Add widget" picker, stat tiles, bar/donut/area charts.
+- [ ] Goals & Portfolios pages; "Connect goal"/"Connect portfolio" on the project Overview
+      tab.
+- [ ] Workload view (tasks per assignee).
+
+Docs
+- [ ] Update the README.
 
 ## Out of scope
 

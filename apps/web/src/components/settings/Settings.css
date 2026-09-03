@@ -1,0 +1,271 @@
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 15, 12, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 50;
+}
+
+.settings-modal {
+  width: 720px;
+  max-width: 100%;
+  max-height: 85vh;
+  background: var(--bg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.settings-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-modal__header h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 20px;
+  margin: 0;
+}
+
+.settings-modal__header button {
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.settings-modal__header button:hover {
+  background: var(--bg-soft);
+}
+
+.settings-modal__body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.settings-modal__nav {
+  width: 160px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-modal__nav button {
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.settings-modal__nav button:hover {
+  background: var(--bg-soft);
+}
+
+.settings-modal__nav button.is-active {
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.settings-modal__content {
+  flex: 1;
+  padding: 20px 24px;
+  overflow-y: auto;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.settings-field-row {
+  display: flex;
+  gap: 16px;
+}
+
+.settings-field-row label {
+  flex: 1;
+}
+
+.settings-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.settings-form input,
+.settings-form textarea {
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-h);
+  resize: vertical;
+}
+
+.settings-form input:focus-visible,
+.settings-form textarea:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-bg);
+}
+
+.settings-saved {
+  font-size: 13px;
+  color: var(--card-green, #36b37e);
+  margin: 0;
+}
+
+.settings-section {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-section h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15px;
+  margin: 0;
+  color: var(--text-h);
+}
+
+.settings-section button {
+  align-self: flex-start;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.settings-section button:hover {
+  background: var(--bg-soft);
+}
+
+.settings-email-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-email-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  padding: 6px 0;
+}
+
+.settings-email-list li span:first-child {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.settings-email-badge {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-bg);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.settings-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0 !important;
+  border-radius: var(--radius-sm) !important;
+  color: var(--text);
+}
+
+.settings-add-email {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-add-email input {
+  flex: 1;
+  font: inherit;
+  font-size: 14px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.settings-add-email button {
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  cursor: pointer;
+}
+
+.settings-add-email button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.settings-section--danger h3 {
+  color: var(--error);
+}
+
+.settings-danger-confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13.5px;
+  flex-wrap: wrap;
+}
+
+.settings-danger-button {
+  background: var(--error) !important;
+  border-color: var(--error) !important;
+  color: #fff !important;
+}

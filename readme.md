@@ -122,6 +122,14 @@ This runs the API and web app concurrently:
 - API: [http://localhost:4002](http://localhost:4002) (health check at `/api/health`)
 - Web: [http://localhost:5173](http://localhost:5173)
 
+### 6. Create a workspace
+
+After signing up and logging in, the app gates behind having at least one **workspace** — the
+root of the domain hierarchy (`Workspace > Project > Section > Task > Subtask`, see
+[docs/sprint-backlog.md](docs/sprint-backlog.md)). You'll be prompted to create one on first
+login; more can be created later from the workspace switcher in the sidebar. Settings
+(profile, account, emails, sessions) are reachable from the "Settings" link in the sidebar.
+
 ## Useful Scripts
 
 Run from the repo root:

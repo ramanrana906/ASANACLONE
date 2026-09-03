@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, ne } from "drizzle-orm";
 import { db } from "../db";
 import { sessions } from "../db/schema";
 import { generateToken, hashToken } from "./tokens";
@@ -61,4 +61,28 @@ export async function revokeSessionByRefreshToken(refreshToken: string): Promise
     .update(sessions)
     .set({ revokedAt: new Date() })
     .where(eq(sessions.refreshTokenHash, hashToken(refreshToken)));
+}
+
+export async function revokeOtherSessions(
+  userId: number,
+  currentRefreshToken: string | null,
+): Promise<void> {
+  const currentHash = currentRefreshToken ? hashToken(currentRefreshToken) : null;
+  await db
+    .update(sessions)
+    .set({ revokedAt: new Date() })
+    .where(
+      and(
+        eq(sessions.userId, userId),
+        isNull(sessions.revokedAt),
+        currentHash ? ne(sessions.refreshTokenHash, currentHash) : undefined,
+      ),
+    );
+}
+
+export async function revokeAllSessions(userId: number): Promise<void> {
+  await db
+    .update(sessions)
+    .set({ revokedAt: new Date() })
+    .where(and(eq(sessions.userId, userId), isNull(sessions.revokedAt)));
 }

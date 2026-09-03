@@ -15,6 +15,33 @@ export const users = pgTable("users", {
   emailVerificationToken: text("email_verification_token"),
   passwordResetToken: text("password_reset_token"),
   passwordResetExpiresAt: timestamp("password_reset_expires_at"),
+  photoUrl: text("photo_url"),
+  pronouns: text("pronouns"),
+  jobTitle: text("job_title"),
+  department: text("department"),
+  aboutMe: text("about_me"),
+  outOfOfficeMessage: text("out_of_office_message"),
+  outOfOfficeUntil: timestamp("out_of_office_until"),
+  deactivatedAt: timestamp("deactivated_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userEmails = pgTable("user_emails", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  email: text("email").notNull().unique(),
+  isPreferred: boolean("is_preferred").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const workspaces = pgTable("workspaces", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  ownerId: integer("owner_id")
+    .notNull()
+    .references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
