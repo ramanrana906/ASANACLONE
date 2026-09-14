@@ -52,6 +52,12 @@
   color: var(--rail-text-active);
 }
 
+.project-nav__list button:focus-visible,
+.project-nav__new:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .project-nav__list button.is-active {
   background: var(--rail-bg-active);
   color: var(--accent);
@@ -98,7 +104,7 @@
 
 .projects-list {
   width: 100%;
-  max-width: 960px;
+  max-width: 1400px;
   padding: 44px 40px;
 }
 
@@ -171,6 +177,11 @@
   box-shadow: var(--shadow);
 }
 
+.view-toggle button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .projects-list__create-form {
   display: flex;
   gap: 8px;
@@ -204,6 +215,11 @@
   background: var(--accent);
   border-color: var(--accent);
   color: var(--accent-contrast);
+}
+
+.projects-list__create-form button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .projects-list__empty {
@@ -412,7 +428,7 @@
 
 .project-page {
   width: 100%;
-  max-width: 960px;
+  max-width: 1400px;
   padding: 36px 40px;
 }
 
@@ -469,6 +485,11 @@
   border-bottom-color: var(--accent);
 }
 
+.project-page__tabs button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .project-page__coming-soon {
   color: var(--text);
   font-size: 14px;
@@ -477,10 +498,70 @@
 /* ---- Overview tab ---- */
 
 .overview-tab {
+  display: grid;
+  grid-template-columns: minmax(0, 640px) 260px;
+  align-items: start;
+  gap: 48px;
+  max-width: 1040px;
+}
+
+.overview-tab__main {
   display: flex;
   flex-direction: column;
   gap: 28px;
-  max-width: 600px;
+  min-width: 0;
+}
+
+.overview-tab__side {
+  min-width: 0;
+}
+
+.overview-tab__details-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg);
+}
+
+.overview-tab__details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+}
+
+.overview-tab__details-list > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.overview-tab__details-list dt {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.overview-tab__details-list dd {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.overview-tab__details-person {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+@media (max-width: 860px) {
+  .overview-tab {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .overview-tab__label {
@@ -515,6 +596,11 @@
   align-items: center;
 }
 
+.overview-tab__status-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .overview-tab__status-menu {
   position: absolute;
   top: calc(100% + 6px);
@@ -547,6 +633,11 @@
 
 .overview-tab__status-menu button:hover {
   background: var(--bg-soft);
+}
+
+.overview-tab__status-menu button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .overview-tab__description {
@@ -598,8 +689,218 @@
   cursor: pointer;
 }
 
+.overview-tab__add-member-form button:focus-visible,
+.overview-tab__add-member-form select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .overview-tab__empty {
   font-size: 13.5px;
   color: var(--text);
   margin: 0;
+}
+
+/* ---- Milestones ---- */
+
+.overview-tab__milestones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.overview-tab__milestone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 6px 4px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-h);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.overview-tab__milestone:hover {
+  background: var(--bg-soft);
+}
+
+.overview-tab__milestone:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.overview-tab__milestone-icon {
+  color: var(--card-purple);
+  flex-shrink: 0;
+}
+
+.overview-tab__milestone .is-done {
+  color: var(--text);
+  text-decoration: line-through;
+}
+
+/* ---- Custom fields admin ---- */
+
+.custom-field-admin__list {
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.custom-field-admin__item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-soft);
+}
+
+.custom-field-admin__item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.custom-field-admin__name,
+.custom-field-admin__name-input {
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.custom-field-admin__name {
+  border: none;
+  background: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.custom-field-admin__name:hover {
+  background: var(--bg);
+}
+
+.custom-field-admin__name:focus-visible,
+.custom-field-admin__name-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.custom-field-admin__name-input {
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  padding: 2px 6px;
+}
+
+.custom-field-admin__type {
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  margin-left: auto;
+}
+
+.custom-field-admin__options {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.custom-field-admin__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.custom-field-admin__option button {
+  display: inline-flex;
+  border: none;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  padding: 1px;
+}
+
+.custom-field-admin__option button:focus-visible {
+  outline: 2px solid var(--text-h);
+  outline-offset: 1px;
+}
+
+.custom-field-admin__add-option input {
+  font: inherit;
+  font-size: 12.5px;
+  padding: 4px 8px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--text-h);
+  width: 100px;
+}
+
+.custom-field-admin__create-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.custom-field-admin__create-form input {
+  font: inherit;
+  font-size: 13.5px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.custom-field-admin__create-form select {
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+.custom-field-admin__create-form button {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.custom-field-admin__create-form button:focus-visible,
+.custom-field-admin__create-form select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }

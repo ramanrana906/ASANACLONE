@@ -1,0 +1,333 @@
+/* ---- List tab ---- */
+
+.list-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.list-tab__header-row {
+  display: grid;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.list-tab__col {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: default;
+  text-align: left;
+}
+
+.list-tab__header-row button.list-tab__col {
+  cursor: pointer;
+}
+
+.list-tab__header-row button.list-tab__col:hover {
+  color: var(--text-h);
+}
+
+.list-tab__header-row button.list-tab__col:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.list-tab__group {
+  display: flex;
+  flex-direction: column;
+}
+
+.list-tab__group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: var(--bg-soft);
+  color: var(--text-h);
+  font: inherit;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 13.5px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.list-tab__group-header:hover {
+  background: var(--border);
+}
+
+.list-tab__group-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.list-tab__group-count {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.list-tab__row {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--text-h);
+  text-align: left;
+}
+
+.list-tab__row:hover {
+  background: var(--bg-soft);
+}
+
+.list-tab__row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.list-tab__col--name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-tab__col--name .is-done {
+  color: var(--text);
+  text-decoration: line-through;
+}
+
+.list-tab__milestone {
+  color: var(--card-purple);
+  margin-right: 4px;
+  flex-shrink: 0;
+  vertical-align: -1px;
+}
+
+.list-tab__assignee {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-tab__empty {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text);
+  margin: 0;
+}
+
+/* ---- Calendar tab ---- */
+
+.calendar-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 980px;
+}
+
+.calendar-tab__nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-tab__nav h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0;
+  min-width: 180px;
+}
+
+.calendar-tab__nav > button:not(.calendar-tab__today) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.calendar-tab__nav > button:hover {
+  background: var(--bg-soft);
+}
+
+.calendar-tab__nav > button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.calendar-tab__today {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.calendar-tab__today:hover {
+  background: var(--bg-soft);
+}
+
+.calendar-tab__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--border);
+  gap: 1px;
+}
+
+.calendar-tab__weekday {
+  background: var(--bg-soft);
+  padding: 8px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text);
+  text-align: center;
+}
+
+.calendar-tab__day {
+  background: var(--bg);
+  min-height: 96px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-tab__day.is-outside {
+  background: var(--bg-soft);
+  color: var(--text);
+}
+
+.calendar-tab__day.is-outside .calendar-tab__day-header span {
+  color: var(--text);
+}
+
+.calendar-tab__day.is-today .calendar-tab__day-header span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.calendar-tab__day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendar-tab__day-header span {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.calendar-tab__day-header button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.calendar-tab__day-header button:hover {
+  background: var(--bg-soft);
+  color: var(--text-h);
+}
+
+.calendar-tab__day-header button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.calendar-tab__day-tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.calendar-tab__task-chip {
+  font: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-tab__task-chip:hover {
+  background: var(--accent-border);
+}
+
+.calendar-tab__task-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.calendar-tab__task-chip.is-done {
+  color: var(--text);
+  text-decoration: line-through;
+}
+
+.calendar-tab__add-form input {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 11.5px;
+  padding: 3px 6px;
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-h);
+}

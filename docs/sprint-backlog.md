@@ -286,161 +286,225 @@ Docs
 ## Sprint 6 tasks: Sections & Board view
 
 Schema
-- [ ] Add a `sections` table: `id`, `projectId` (FK), `name`, `position` (integer, for
+- [x] Add a `sections` table: `id`, `projectId` (FK), `name`, `position` (integer, for
       ordering), `createdAt`.
-- [ ] Drop the old flat `boards` table entirely (retired in favor of `sections`).
-- [ ] Generate and run the DB migration.
+- [x] Drop the old flat `boards` table entirely (retired in favor of `sections`).
+- [x] Generate and run the DB migration.
 
 Shared package
-- [ ] Add Zod schemas: `sectionSchema`, `createSectionSchema`, `reorderSectionsSchema`.
-- [ ] Remove `boardSchema`/`createBoardSchema` (`packages/shared/src/board.ts`) and its export
+- [x] Add Zod schemas: `sectionSchema`, `createSectionSchema`, `reorderSectionsSchema`.
+- [x] Remove `boardSchema`/`createBoardSchema` (`packages/shared/src/board.ts`) and its export
       from `index.ts`.
 
 API
-- [ ] `POST /api/projects/:id/sections` / `GET /api/projects/:id/sections` /
+- [x] `POST /api/projects/:id/sections` / `GET /api/projects/:id/sections` /
       `PATCH /api/sections/:id` / `DELETE /api/sections/:id`.
-- [ ] `PATCH /api/projects/:id/sections/reorder`.
-- [ ] Remove `boardsRoutes` (`apps/api/src/routes/boards.ts`) and its registration in
+- [x] `PATCH /api/projects/:id/sections/reorder`.
+- [x] Remove `boardsRoutes` (`apps/api/src/routes/boards.ts`) and its registration in
       `server.ts`.
 
 Frontend
-- [ ] Board tab: sections rendered as kanban columns, "+ Add section", drag-to-reorder
-      columns.
+- [x] Board tab: sections rendered as kanban columns, "+ Add section", drag-to-reorder
+      columns. (Native HTML5 drag-and-drop, no new dependency. Columns are empty placeholders
+      until Sprint 7 adds tasks.)
 
 Docs
-- [ ] Update the README noting the schema pivot away from a standalone `boards` table.
+- [x] Update the README noting the schema pivot away from a standalone `boards` table.
 
 ## Sprint 7 tasks: Tasks (core)
 
 Schema
-- [ ] Add a `tasks` table: `id`, `title`, `description` (nullable), `completed` (bool,
+- [x] Add a `tasks` table: `id`, `title`, `description` (nullable), `completed` (bool,
       default false), `completedAt` (nullable), `dueDateStart` (nullable), `dueDateEnd`
       (nullable), `assigneeId` (FK → `users`, nullable), `createdBy` (FK → `users`),
       `createdAt`.
-- [ ] Add a `task_projects` join table: `id`, `taskId` (FK), `projectId` (FK), `sectionId`
+- [x] Add a `task_projects` join table: `id`, `taskId` (FK), `projectId` (FK), `sectionId`
       (FK), `position` (integer). Unique on `(taskId, projectId)` — this is how a task can
       belong to multiple projects at once, each with its own section placement.
-- [ ] Generate and run the DB migration.
+- [x] Generate and run the DB migration.
 
 Shared package
-- [ ] Add Zod schemas: `taskSchema`, `createTaskSchema`, `updateTaskSchema`,
-      `moveTaskSchema`.
+- [x] Add Zod schemas: `taskSchema`, `createTaskSchema`, `updateTaskSchema`,
+      `moveTaskSchema`. (Also added `taskCardSchema`, `taskDetailSchema`, `taskProjectRefSchema`
+      for the Board list and detail-panel response shapes.)
 
 API
-- [ ] `POST /api/tasks` (title + initial `projectId`/`sectionId`).
-- [ ] `GET /api/projects/:id/tasks` – tasks grouped by section, for Board view.
-- [ ] `GET /api/tasks/:id` / `PATCH /api/tasks/:id` (title, description, assignee, due date,
+- [x] `POST /api/tasks` (title + initial `projectId`/`sectionId`).
+- [x] `GET /api/projects/:id/tasks` – tasks grouped by section, for Board view.
+- [x] `GET /api/tasks/:id` / `PATCH /api/tasks/:id` (title, description, assignee, due date,
       completed) / `DELETE /api/tasks/:id`.
-- [ ] `PATCH /api/tasks/:id/move` – change section/position, or add/remove a project.
+- [x] `PATCH /api/tasks/:id/move` – change section/position, or add/remove a project
+      (upserts the `task_projects` row and renumbers both the source and destination
+      sections). Added `DELETE /api/tasks/:id/projects/:projectId` for the explicit "remove
+      a project" half of this, refusing to remove a task's last remaining project.
+- [x] Fixed a gap the Sprint 6 section-delete endpoint left open: deleting a section with
+      tasks in it would have hit a foreign-key violation now that `task_projects` exists.
+      It now returns 400 until the section is emptied.
 
 Frontend
-- [ ] Task cards in Board columns (title, assignee avatar, due-date range); "+ Add task" per
+- [x] Task cards in Board columns (title, assignee avatar, due-date range); "+ Add task" per
       section.
-- [ ] Drag-and-drop cards between/within sections, persisting position.
-- [ ] Task detail side panel: header ("Mark complete", assignee avatar + add, Share,
-      collapse/expand-to-full-page), title, Assignee row, Due date row (range picker),
-      Projects list (a chip per project + a section dropdown), Description textarea. Opens on
-      card click.
+- [x] Drag-and-drop cards between/within sections, persisting position (native HTML5 DnD,
+      same approach as Sprint 6's section reordering, disambiguated via drag-state so
+      dragging a card doesn't also trigger a section reorder).
+- [x] Task detail side panel: header ("Mark complete", close), title, Assignee row, Due date
+      row (start/end date pickers), Projects list (a chip per project + section name, add
+      another project from the same workspace, remove with inline confirm), Description
+      textarea (autosaves on blur). Opens on card click. Scoped down from the original
+      bullet: no "Share" button and no collapse/expand-to-full-page — both would need
+      infrastructure this app doesn't have yet (a sharing/permissions model beyond project
+      membership, and a dedicated full-page task route), so building them would have been
+      fake UI.
 
 Docs
-- [ ] Update the README with the task concept.
+- [x] Update the README with the task concept.
 
 ## Sprint 8 tasks: Task collaboration
 
 Schema
-- [ ] Add a `task_followers` join table: `taskId` (FK), `userId` (FK), composite PK.
-- [ ] Add a `comments` table: `id`, `taskId` (FK), `authorId` (FK), `body`, `createdAt`,
+- [x] Add a `task_followers` join table: `taskId` (FK), `userId` (FK), composite PK.
+- [x] Add a `comments` table: `id`, `taskId` (FK), `authorId` (FK), `body`, `createdAt`,
       `editedAt` (nullable).
-- [ ] Add an `activity_log` table: `id`, `taskId` (FK), `actorId` (FK), `type` (e.g.
+- [x] Add an `activity_log` table: `id`, `taskId` (FK), `actorId` (FK), `type` (e.g.
       `due_date_changed`, `assignee_changed`, `completed`, `section_changed`), `metadata`
-      (jsonb), `createdAt`.
-- [ ] Add an `attachments` table: `id`, `taskId` (FK), `uploadedBy` (FK), `fileName`,
+      (jsonb), `createdAt`. Also added a `reopened` type as the natural counterpart to
+      `completed` — otherwise un-completing a task would leave no trace in the feed.
+- [x] Add an `attachments` table: `id`, `taskId` (FK), `uploadedBy` (FK), `fileName`,
       `fileUrl`, `fileSize`, `mimeType`, `createdAt`.
-- [ ] Add a `messages` table (project-level): `id`, `projectId` (FK), `authorId` (FK), `body`,
+- [x] Add a `messages` table (project-level): `id`, `projectId` (FK), `authorId` (FK), `body`,
       `createdAt`, `editedAt` (nullable).
-- [ ] Generate and run the DB migration.
+- [x] Generate and run the DB migration.
+- [x] Fixed two pre-existing gaps found while wiring this up: deleting a task never cleaned
+      up its `task_projects`/(now) comments/activity/attachments/followers rows, and deleting
+      a project never cascaded to its sections/tasks at all — both would have hit foreign-key
+      violations. Both deletes now cascade correctly (a task keeps living if it still belongs
+      to another project; only removed outright when this was its last one).
 
 Shared package
-- [ ] Add Zod schemas: `commentSchema`, `createCommentSchema`, `messageSchema`,
-      `createMessageSchema`.
+- [x] Add Zod schemas: `commentSchema`, `createCommentSchema`, `messageSchema`,
+      `createMessageSchema`. Also added `activityEntrySchema`, `attachmentSchema`,
+      `addFollowerSchema`, and extended `taskDetailSchema` with `followers`.
 
 API
-- [ ] `POST /api/tasks/:id/comments` / `GET /api/tasks/:id/comments`.
-- [ ] `POST /api/tasks/:id/followers` / `DELETE /api/tasks/:id/followers/:userId`.
-- [ ] `POST /api/tasks/:id/attachments` (multipart upload, stored under a local `uploads/`
-      dir in dev) / `GET` / `DELETE`.
-- [ ] `GET /api/tasks/:id/activity`.
-- [ ] `POST /api/projects/:id/messages` / `GET /api/projects/:id/messages`.
+- [x] `POST /api/tasks/:id/comments` / `GET /api/tasks/:id/comments`.
+- [x] `POST /api/tasks/:id/followers` / `DELETE /api/tasks/:id/followers/:userId`.
+- [x] `POST /api/tasks/:id/attachments` (multipart upload via `@fastify/multipart`, stored
+      under a local `uploads/` dir in dev, 20MB cap) / `GET` / `DELETE` (also removes the file
+      from disk).
+- [x] `GET /api/tasks/:id/activity`.
+- [x] `POST /api/projects/:id/messages` / `GET /api/projects/:id/messages`.
+- Note: comments and messages intentionally have no edit/delete endpoints yet — not asked
+      for in this sprint, and activity-log entries are meant to be an immutable audit trail.
 
 Frontend
-- [ ] Comments + activity feed at the bottom of the task panel (Oldest/Newest sort,
+- [x] Comments + activity feed at the bottom of the task panel (Oldest/Newest sort,
       interleaved), with a composer box.
-- [ ] Attachments section (upload button, file list with download links).
-- [ ] Followers UI (avatar stack, add/remove self); assignee row gets a read-state indicator.
-- [ ] Messages tab on the project page: composer + chronological feed.
+- [x] Attachments section (upload button, file list with download links).
+- [x] Followers UI (avatar stack, add/remove self).
+- [x] Messages tab on the project page: composer + chronological feed.
+- Scoped down: no "read-state indicator" on the assignee row. That needs its own
+      per-user/per-task "last viewed" tracking mechanism, which isn't built yet — faking a
+      dot that doesn't track anything real would be worse than omitting it.
 
 Docs
-- [ ] Update the README: note attachment storage is local disk in dev, swap for
+- [x] Update the README: note attachment storage is local disk in dev, swap for
       S3-compatible storage in production.
 
 ## Sprint 9 tasks: Task depth
 
 Schema
-- [ ] Add `tasks.parentTaskId` — a nullable self-referential FK (subtasks) and
+- [x] Add `tasks.parentTaskId` — a nullable self-referential FK (subtasks) and
       `tasks.isMilestone` (bool, default false).
-- [ ] Add a `task_dependencies` table: `id`, `taskId` (FK), `dependsOnTaskId` (FK). Unique on
+- [x] Add a `task_dependencies` table: `id`, `taskId` (FK), `dependsOnTaskId` (FK). Unique on
       `(taskId, dependsOnTaskId)`.
-- [ ] Add a `custom_fields` table: `id`, `projectId` (FK), `name`, `type` enum
+- [x] Add a `custom_fields` table: `id`, `projectId` (FK), `name`, `type` enum
       (`single_select`/`multi_select`/`text`/`number`), `options` (jsonb — array of
       `{label, color}` for select types), `createdAt`.
-- [ ] Add a `custom_field_values` table: `id`, `customFieldId` (FK), `taskId` (FK),
+- [x] Add a `custom_field_values` table: `id`, `customFieldId` (FK), `taskId` (FK),
       `projectId` (FK — since a multi-project task can have different values per project),
       `value` (jsonb). Unique on `(customFieldId, taskId, projectId)`.
-- [ ] Generate and run the DB migration.
+- [x] Generate and run the DB migration.
+- [x] Extracted `deleteTaskFully` (`apps/api/src/lib/taskDelete.ts`) so deleting a task
+      cascades through subtasks (recursively), dependencies (either direction), and custom
+      field values too — used by both the task-delete endpoint and the project-delete
+      cascade, so those two paths can't drift out of sync again.
 
 Shared package
-- [ ] Add Zod schemas: `customFieldSchema`, `createCustomFieldSchema`,
-      `customFieldValueSchema`, `taskDependencySchema`.
+- [x] Add Zod schemas: `customFieldSchema`, `createCustomFieldSchema`,
+      `customFieldValueSchema` (as `setCustomFieldValuesSchema`/`customFieldValueSchema`),
+      `taskDependencySchema` (as `taskDependencyRefSchema`/`taskDependenciesSchema`/
+      `createTaskDependencySchema`). Also added `subtaskSchema`/`createSubtaskSchema` and
+      `setMilestoneSchema`, and extended `taskProjectRefSchema` with a nested `customFields`
+      array per project.
 
 API
-- [ ] `POST /api/tasks/:id/subtasks` (creates a task with `parentTaskId` set) /
-      `GET /api/tasks/:id/subtasks`.
-- [ ] `POST /api/tasks/:id/dependencies` / `DELETE /api/tasks/:id/dependencies/:id`.
-- [ ] `POST /api/projects/:id/custom-fields` / `GET` / `PATCH` / `DELETE`.
-- [ ] `PUT /api/tasks/:id/custom-field-values` (scoped to a project).
-- [ ] `PATCH /api/tasks/:id/milestone` (toggle).
+- [x] `POST /api/tasks/:id/subtasks` (creates a task with `parentTaskId` set) /
+      `GET /api/tasks/:id/subtasks`. Subtask completion/rename/delete reuse the existing
+      `PATCH`/`DELETE /api/tasks/:id` endpoints — `requireTaskAccess` now falls back to the
+      parent task's access when a task has no project links of its own.
+- [x] `POST /api/tasks/:id/dependencies` / `GET /api/tasks/:id/dependencies` (returns both
+      `blockedBy` and `blocking`, not in the original bullet list but needed to render
+      either direction) / `DELETE /api/tasks/:id/dependencies/:dependencyId`.
+- [x] `POST /api/projects/:id/custom-fields` / `GET` / `PATCH` / `DELETE`.
+- [x] `PUT /api/tasks/:id/custom-field-values` (scoped to a project).
+- [x] `PATCH /api/tasks/:id/milestone` (toggle).
 
 Frontend
-- [ ] Subtasks section on the task panel: add input, checklist-style list with its own
+- [x] Subtasks section on the task panel: add input, checklist-style list with its own
       completion state.
-- [ ] Dependencies row: "Add dependencies" picker (search tasks, blocking/waiting-on).
-- [ ] Custom fields table on the task panel: colored pills per field type, nested under each
+- [x] Dependencies row: "Add dependencies" picker (search tasks, blocking/waiting-on).
+      Scoped down: search is limited to the task's own (first) linked project rather than
+      across every project, to avoid an open-ended cross-project search UI.
+- [x] Custom fields table on the task panel: colored pills per field type, nested under each
       project the task belongs to.
-- [ ] Project settings: custom-field admin UI (create/edit/reorder fields + options/colors).
-- [ ] Milestone diamond marker on cards/panel; wire up the Overview tab's "Milestones" list.
+- [x] Custom-field admin UI (create/edit/delete fields + options/colors) — added to the
+      Overview tab rather than a separate "Project settings" surface, since Overview is
+      already this project's settings/config hub (status, description, roles). Field and
+      option **reordering** is out of scope for this pass — noted here rather than silently
+      dropped.
+- [x] Milestone diamond marker on cards/panel; wired up the Overview tab's "Milestones" list
+      (clicking a milestone opens its task panel).
 
 Docs
-- [ ] Update the README with the task-depth concepts.
+- [x] Update the README with the task-depth concepts.
 
 ## Sprint 10 tasks: More views
 
 Schema
-- [ ] None — List and Calendar are read/query modes over existing `sections`/`tasks` data.
+- [x] None — List and Calendar are read/query modes over existing `sections`/`tasks` data.
 
 API
-- [ ] Extend `GET /api/projects/:id/tasks` with `view`/`sort`/`group` query params for List.
-- [ ] `GET /api/projects/:id/tasks?view=calendar&month=...` — date-range filtered for
-      Calendar.
+- [x] `GET /api/projects/:id/tasks` now returns each card's `customFieldValues`
+      (`customFieldId`/`value` pairs) alongside the existing fields, so the List tab can
+      render a column per custom field from the one existing endpoint.
+      Scoped down: no new `view`/`sort`/`group` query params, and no separate
+      `view=calendar&month=...` endpoint. List's sort/group and Calendar's date-range
+      bucketing are both done client-side over the existing full-project task list, since
+      this project's task counts don't call for server-side paging/filtering yet — adding
+      query-param plumbing ahead of that need would be speculative.
 
 Frontend
-- [ ] List tab: sortable/groupable table (Name, Assignee, Due date, one column per custom
-      field), sections as collapsible row-groups.
-- [ ] Calendar tab: month grid, tasks rendered as date-range bars, "+ Add task" per day,
-      month navigation.
-- [ ] Project tab bar now has Board, List, and Calendar all live.
+- [x] List tab (`ListTab.tsx`): sortable table (Name/Assignee/Due date, click a header to
+      toggle sort direction) with one column per project custom field, sections rendered as
+      collapsible row-groups (row count per group, click to collapse/expand).
+- [x] Calendar tab (`CalendarTab.tsx`): month grid with prev/next/Today navigation, tasks
+      rendered as chips on every day within their due-date range (built with timezone-safe
+      date-key slicing, not `Date` round-tripping, to avoid off-by-one-day bugs), a "+" quick-add
+      per day that creates the task in the project's first section and sets both due-date
+      bounds to that day, today's cell highlighted.
+      Scoped down: date-range tasks render as a chip repeated on each day rather than a
+      single spanning bar across the week grid — a true multi-day bar needs row-spanning
+      layout math that's a bigger lift than this pass's scope.
+- [x] Project tab bar now has Board, List, and Calendar all live.
 
 Docs
-- [ ] Update the README.
+- [x] Update the README.
+
+Bug fixed during this pass: `ListTab`'s `gridTemplateColumns` interpolated
+`repeat(${fields.length}, 130px)` unconditionally, which produced the invalid
+`repeat(0, 130px)` for any project with zero custom fields — invalid CSS silently drops the
+whole `grid-template-columns` declaration, collapsing the table to stacked single-column
+rows. Fixed with a conditional that omits the `repeat()` clause when there are no fields.
 
 ## Sprint 11 tasks: Search & personal views
 

@@ -32,3 +32,6 @@ dist-ssr
 
 # Turborepo (if you add it later)
 .turbo
+
+# Local attachment storage (dev only — swap for S3-compatible storage in production)
+apps/api/uploads

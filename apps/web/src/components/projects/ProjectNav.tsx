@@ -54,6 +54,7 @@ export function ProjectNav({
               className={project.id === selectedProjectId ? "is-active" : ""}
               onClick={() => onSelect(project.id)}
               title={project.name}
+              aria-label={collapsed ? project.name : undefined}
             >
               <ProjectIcon projectKey={project.id} size={16} />
               {!collapsed && <span>{project.name}</span>}

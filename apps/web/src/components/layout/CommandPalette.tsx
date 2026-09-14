@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MagnifyingGlass, X } from "@phosphor-icons/react";
 import { listProjects } from "../../lib/projects";
 import { listMembers } from "../../lib/members";
+import { search as searchWorkspace } from "../../lib/search";
 import { ProjectIcon } from "../common/ProjectIcon";
 import { Avatar } from "../common/Avatar";
 
@@ -11,17 +12,20 @@ interface CommandPaletteProps {
   onClose: () => void;
   onSelectProject: (projectId: number) => void;
   onSelectPerson: () => void;
+  onSelectTask: (projectId: number, taskId: number) => void;
 }
 
 type PaletteItem =
   | { kind: "project"; id: number; name: string }
-  | { kind: "person"; id: number; name: string };
+  | { kind: "person"; id: number; name: string }
+  | { kind: "task"; id: number; name: string; projectId: number; projectName: string };
 
 export function CommandPalette({
   workspaceId,
   onClose,
   onSelectProject,
   onSelectPerson,
+  onSelectTask,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -42,6 +46,12 @@ export function CommandPalette({
 
   const needle = query.trim().toLowerCase();
 
+  const searchQuery = useQuery({
+    queryKey: ["search", workspaceId, needle],
+    queryFn: () => searchWorkspace(workspaceId, needle),
+    enabled: needle.length > 0,
+  });
+
   const filteredProjects = useMemo(
     () => (projectsQuery.data ?? []).filter((p) => p.name.toLowerCase().includes(needle)),
     [projectsQuery.data, needle],
@@ -50,17 +60,26 @@ export function CommandPalette({
     () => (membersQuery.data ?? []).filter((m) => m.name.toLowerCase().includes(needle)),
     [membersQuery.data, needle],
   );
+  const taskResults = needle.length > 0 ? (searchQuery.data?.tasks ?? []) : [];
 
   const items: PaletteItem[] = useMemo(
     () => [
       ...filteredProjects.map((p) => ({ kind: "project" as const, id: p.id, name: p.name })),
+      ...taskResults.map((t) => ({
+        kind: "task" as const,
+        id: t.id,
+        name: t.title,
+        projectId: t.projectId,
+        projectName: t.projectName,
+      })),
       ...filteredMembers.map((m) => ({ kind: "person" as const, id: m.userId, name: m.name })),
     ],
-    [filteredProjects, filteredMembers],
+    [filteredProjects, taskResults, filteredMembers],
   );
 
   function select(item: PaletteItem) {
     if (item.kind === "project") onSelectProject(item.id);
+    else if (item.kind === "task") onSelectTask(item.projectId, item.id);
     else onSelectPerson();
     onClose();
   }
@@ -127,6 +146,39 @@ export function CommandPalette({
                   >
                     <ProjectIcon projectKey={project.id} size={20} />
                     <span>{project.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {taskResults.length > 0 && (
+            <div className="command-palette__group">
+              <span className="command-palette__group-label">Tasks</span>
+              {taskResults.map((task) => {
+                const index = items.findIndex(
+                  (item) => item.kind === "task" && item.id === task.id,
+                );
+                return (
+                  <button
+                    type="button"
+                    key={task.id}
+                    className={index === activeIndex ? "is-active" : ""}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onClick={() =>
+                      select({
+                        kind: "task",
+                        id: task.id,
+                        name: task.title,
+                        projectId: task.projectId,
+                        projectName: task.projectName,
+                      })
+                    }
+                  >
+                    <span className={task.completed ? "command-palette__task-done" : ""}>
+                      {task.title}
+                    </span>
+                    <span className="command-palette__task-project">{task.projectName}</span>
                   </button>
                 );
               })}

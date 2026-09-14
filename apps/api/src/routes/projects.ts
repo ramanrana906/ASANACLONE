@@ -10,8 +10,18 @@ import {
   type ProjectMember,
 } from "@asanaClone/shared";
 import { db } from "../db";
-import { projectMembers, projects, users } from "../db/schema";
+import {
+  customFields,
+  customFieldValues,
+  messages,
+  projectMembers,
+  projects,
+  sections,
+  taskProjects,
+  users,
+} from "../db/schema";
 import { getMembership } from "../lib/workspaceAccess";
+import { deleteTaskFully } from "../lib/taskDelete";
 
 const workspaceIdParamsSchema = z.object({ id: z.coerce.number() });
 const projectIdParamsSchema = z.object({ id: z.coerce.number() });
@@ -166,6 +176,34 @@ export const projectsRoutes: FastifyPluginAsyncZod = async (app) => {
         return reply.status(404).send({ error: "Project not found" });
       }
 
+      // A task can belong to more than one project. Deleting this project should
+      // only delete a task outright if this was its last remaining project link;
+      // otherwise just drop the link and leave the task alone elsewhere.
+      const links = await db
+        .select()
+        .from(taskProjects)
+        .where(eq(taskProjects.projectId, project.id));
+
+      for (const link of links) {
+        const otherLinks = await db
+          .select()
+          .from(taskProjects)
+          .where(eq(taskProjects.taskId, link.taskId));
+
+        if (otherLinks.length > 1) {
+          await db.delete(taskProjects).where(eq(taskProjects.id, link.id));
+          continue;
+        }
+
+        await deleteTaskFully(link.taskId);
+      }
+
+      // Custom field values scoped to this project need clearing even for tasks
+      // that survive (they still belong to another project).
+      await db.delete(customFieldValues).where(eq(customFieldValues.projectId, project.id));
+      await db.delete(customFields).where(eq(customFields.projectId, project.id));
+      await db.delete(sections).where(eq(sections.projectId, project.id));
+      await db.delete(messages).where(eq(messages.projectId, project.id));
       await db.delete(projectMembers).where(eq(projectMembers.projectId, project.id));
       await db.delete(projects).where(eq(projects.id, project.id));
       return reply.send({ ok: true });

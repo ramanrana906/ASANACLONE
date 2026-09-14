@@ -5,6 +5,7 @@ import cookies from "@fastify/cookie";
 import jwt from "@fastify/jwt";
 import rateLimit from "@fastify/rate-limit";
 import oauth2 from "@fastify/oauth2";
+import multipart from "@fastify/multipart";
 import { eq } from "drizzle-orm";
 import {
   serializerCompiler,
@@ -14,12 +15,24 @@ import {
 import { db } from "./db";
 import { users } from "./db/schema";
 import { authRoutes } from "./routes/auth";
-import { boardsRoutes } from "./routes/boards";
 import { healthRoutes } from "./routes/health";
 import { usersRoutes } from "./routes/users";
 import { workspacesRoutes } from "./routes/workspaces";
 import { invitesRoutes } from "./routes/invites";
 import { projectsRoutes } from "./routes/projects";
+import { sectionsRoutes } from "./routes/sections";
+import { tasksRoutes } from "./routes/tasks";
+import { commentsRoutes } from "./routes/comments";
+import { followersRoutes } from "./routes/followers";
+import { activityRoutes } from "./routes/activity";
+import { attachmentsRoutes } from "./routes/attachments";
+import { messagesRoutes } from "./routes/messages";
+import { subtasksRoutes } from "./routes/subtasks";
+import { dependenciesRoutes } from "./routes/dependencies";
+import { customFieldsRoutes } from "./routes/customFields";
+import { searchRoutes } from "./routes/search";
+import { meRoutes } from "./routes/me";
+import { notificationsRoutes } from "./routes/notifications";
 
 const app = Fastify({
   logger: true,
@@ -42,6 +55,10 @@ await app.register(jwt, {
 
 await app.register(rateLimit, {
   global: false,
+});
+
+await app.register(multipart, {
+  limits: { fileSize: 20 * 1024 * 1024 },
 });
 
 app.decorate("authenticate", async (request, reply) => {
@@ -86,11 +103,23 @@ await app.register(oauth2, {
 
 await app.register(authRoutes);
 await app.register(healthRoutes);
-await app.register(boardsRoutes);
 await app.register(usersRoutes);
 await app.register(workspacesRoutes);
 await app.register(invitesRoutes);
 await app.register(projectsRoutes);
+await app.register(sectionsRoutes);
+await app.register(tasksRoutes);
+await app.register(commentsRoutes);
+await app.register(followersRoutes);
+await app.register(activityRoutes);
+await app.register(attachmentsRoutes);
+await app.register(messagesRoutes);
+await app.register(subtasksRoutes);
+await app.register(dependenciesRoutes);
+await app.register(customFieldsRoutes);
+await app.register(searchRoutes);
+await app.register(meRoutes);
+await app.register(notificationsRoutes);
 
 const port = Number(process.env.PORT) || 4002;
 

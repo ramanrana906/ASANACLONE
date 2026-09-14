@@ -219,6 +219,11 @@
   color: var(--text);
 }
 
+.settings-icon-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .settings-add-email {
   display: flex;
   gap: 8px;

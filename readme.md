@@ -151,7 +151,51 @@ Inviting someone can also add them straight to specific projects.
 Inside a workspace, the main view is its **Projects** list — click "New project" to create
 one, then click into it. Each project has an Overview tab (status, description, and its own
 roles list — owner/editor/commenter) plus a tab bar for List/Board/Timeline/Dashboard/
-Calendar, which render as placeholders until their sprints land.
+Calendar/Messages. Board renders a project's **sections** as kanban columns (add, rename,
+delete, drag-to-reorder); List and Calendar are two more live views over the same
+sections/tasks (see below); Timeline and Dashboard stay placeholders until their sprints land.
+Sections replace the old standalone `boards` table from earlier sprints — a board is now a
+view over a project's sections, not its own entity, matching the Workspace → Project →
+Section → Task hierarchy.
+
+Sections hold **tasks**: click "Add task" on a column, or click a task card to open its detail
+panel (mark complete, assignee, due-date range, description). Drag a card within or between
+sections to reorder or move it. A task can belong to more than one project at once — the
+detail panel's Projects list shows every project/section it's placed in and lets you add
+another project from the same workspace or remove one (a task always keeps at least one).
+
+The task detail panel also carries **followers** (an avatar stack, plus a Follow/Following
+toggle for yourself — you're auto-followed when you create a task or get assigned to one),
+**attachments** (upload a file, download it, or delete it), and a merged **comments +
+activity feed** at the bottom (oldest/newest sort) — every assignee, due-date, completion, and
+section change is logged there automatically alongside comments you post. Each project also
+has a **Messages** tab: a simple composer and chronological feed for project-level
+discussion, separate from any one task.
+
+Attachment files are stored on local disk under `apps/api/uploads/` in dev (gitignored) and
+served back through an authenticated download route — swap this for S3-compatible object
+storage before running in production; nothing else in the attachment flow needs to change,
+just where `saveUploadedFile`/`deleteAttachmentFile` (`apps/api/src/lib/attachmentStorage.ts`)
+actually write and read bytes.
+
+A task can carry more depth than the board card shows. **Subtasks** are a lightweight
+checklist on the task panel (they don't get their own board placement). **Dependencies** mark
+one task as blocked by another — each side of the relationship shows up on both tasks
+("Blocked by" / "Blocking"), and the picker searches within the task's own project.
+**Custom fields** are defined per project (Overview tab → Custom fields: text, number,
+single-select, or multi-select with colored options) and every task in that project can set
+its own value per field, shown as colored pills on the task panel. Marking a task a
+**milestone** puts a diamond marker on its card and lists it in the project Overview's
+Milestones section.
+
+A project's tasks can also be worked from two other views, alongside Board. The **List** tab
+is a sortable table — click a column header (Name/Assignee/Due date) to sort, grouped into
+collapsible sections, with one extra column per custom field the project defines. The
+**Calendar** tab is a month grid: each task appears as a chip on every day within its due-date
+range, click a day's "+" to quick-add a task due that day, and click a chip to open its detail
+panel. Both views read the same project task list Board uses — there's no separate
+List/Calendar-specific endpoint, so any change made in one view is reflected in the others
+immediately.
 
 ## Useful Scripts
 

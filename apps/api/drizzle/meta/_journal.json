@@ -43,6 +43,48 @@
       "when": 1788441621490,
       "tag": "0005_awesome_the_enforcers",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1788491453714,
+      "tag": "0006_perpetual_hobgoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788491461813,
+      "tag": "0007_lumpy_nitro",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788492076472,
+      "tag": "0008_melted_captain_midlands",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788493422215,
+      "tag": "0009_wakeful_xorn",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788502885814,
+      "tag": "0010_smiling_karma",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788507650019,
+      "tag": "0011_freezing_bill_hollister",
+      "breakpoints": true
     }
   ]
 }

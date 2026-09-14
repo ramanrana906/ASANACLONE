@@ -12,6 +12,7 @@ import {
 import { listProjects } from "../../lib/projects";
 import { useAuth } from "../../hooks/AuthContext";
 import { Avatar } from "../common/Avatar";
+import { ConfirmIconButton } from "../common/ConfirmIconButton";
 
 interface PeopleModalProps {
   workspaceId: number;
@@ -198,14 +199,12 @@ export function PeopleModal({ workspaceId, onClose }: PeopleModalProps) {
                     <span className="people-list__role">{member.role}</span>
                   )}
                   {isAdmin && member.userId !== user?.id && (
-                    <button
-                      type="button"
-                      className="settings-icon-button"
-                      onClick={() => removeMutation.mutate(member.userId)}
-                      aria-label={`Remove ${member.name}`}
-                    >
-                      <X size={16} weight="bold" />
-                    </button>
+                    <ConfirmIconButton
+                      icon={<X size={16} weight="bold" />}
+                      label={`Remove ${member.name}`}
+                      onConfirm={() => removeMutation.mutate(member.userId)}
+                      disabled={removeMutation.isPending}
+                    />
                   )}
                 </li>
               ))}

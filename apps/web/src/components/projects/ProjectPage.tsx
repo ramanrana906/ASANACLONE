@@ -1,11 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft } from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { getProject } from "../../lib/projects";
 import { ProjectIcon } from "../common/ProjectIcon";
 import { OverviewTab } from "./OverviewTab";
+import { BoardTab } from "./BoardTab";
+import { ListTab } from "./ListTab";
+import { CalendarTab } from "./CalendarTab";
+import { MessagesTab } from "./MessagesTab";
+import { TaskDetailPanel } from "../tasks/TaskDetailPanel";
 
-type Tab = "overview" | "list" | "board" | "timeline" | "dashboard" | "calendar";
+type Tab = "overview" | "list" | "board" | "timeline" | "dashboard" | "calendar" | "messages";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "overview", label: "Overview" },
@@ -14,19 +19,26 @@ const TABS: { key: Tab; label: string }[] = [
   { key: "timeline", label: "Timeline" },
   { key: "dashboard", label: "Dashboard" },
   { key: "calendar", label: "Calendar" },
+  { key: "messages", label: "Messages" },
 ];
 
 interface ProjectPageProps {
   projectId: number;
   onBack: () => void;
+  initialTaskId?: number | null;
 }
 
-export function ProjectPage({ projectId, onBack }: ProjectPageProps) {
+export function ProjectPage({ projectId, onBack, initialTaskId }: ProjectPageProps) {
   const [tab, setTab] = useState<Tab>("overview");
+  const [jumpTaskId, setJumpTaskId] = useState<number | null>(null);
   const projectQuery = useQuery({
     queryKey: ["projects", projectId],
     queryFn: () => getProject(projectId),
   });
+
+  useEffect(() => {
+    if (initialTaskId != null) setJumpTaskId(initialTaskId);
+  }, [initialTaskId]);
 
   if (projectQuery.isLoading) {
     return (
@@ -70,12 +82,27 @@ export function ProjectPage({ projectId, onBack }: ProjectPageProps) {
       <div className="project-page__content">
         {tab === "overview" ? (
           <OverviewTab project={project} />
+        ) : tab === "board" ? (
+          <BoardTab projectId={project.id} workspaceId={project.workspaceId} />
+        ) : tab === "list" ? (
+          <ListTab projectId={project.id} workspaceId={project.workspaceId} />
+        ) : tab === "calendar" ? (
+          <CalendarTab projectId={project.id} workspaceId={project.workspaceId} />
+        ) : tab === "messages" ? (
+          <MessagesTab projectId={project.id} />
         ) : (
           <p className="project-page__coming-soon">
             {TABS.find((t) => t.key === tab)?.label} view is coming in a later sprint.
           </p>
         )}
       </div>
+      {jumpTaskId !== null && (
+        <TaskDetailPanel
+          taskId={jumpTaskId}
+          workspaceId={project.workspaceId}
+          onClose={() => setJumpTaskId(null)}
+        />
+      )}
     </div>
   );
 }

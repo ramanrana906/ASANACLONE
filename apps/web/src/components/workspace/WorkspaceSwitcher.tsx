@@ -45,6 +45,7 @@ export function WorkspaceSwitcher({ collapsed = false }: WorkspaceSwitcherProps)
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         title={collapsed ? (currentWorkspace?.name ?? "Select workspace") : undefined}
+        aria-label={collapsed ? (currentWorkspace?.name ?? "Select workspace") : undefined}
       >
         {currentWorkspace && (
           <span

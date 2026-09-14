@@ -102,6 +102,11 @@
   background: var(--bg-soft);
 }
 
+.workspace-switcher__item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 .workspace-switcher__item-name {
   flex: 1;
   overflow: hidden;

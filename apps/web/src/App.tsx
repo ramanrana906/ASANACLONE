@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react'
-import { Gear, SidebarSimple, SignOut, Users } from '@phosphor-icons/react'
+import { useQuery } from '@tanstack/react-query'
+import { Bell, Gear, ListChecks, SidebarSimple, SignOut, Users } from '@phosphor-icons/react'
 import './components/brand/Brand.css'
 import './components/auth/AuthForms.css'
 import './components/workspace/Workspace.css'
 import './components/settings/Settings.css'
 import './components/people/People.css'
 import './components/projects/Projects.css'
+import './components/projects/Board.css'
+import './components/projects/Views.css'
+import './components/projects/Messages.css'
+import './components/tasks/Tasks.css'
+import './components/personal/Personal.css'
 import './components/common/Common.css'
 import './components/layout/Layout.css'
 import { useAuth } from './hooks/AuthContext'
@@ -27,9 +33,12 @@ import { AcceptInviteStatus } from './components/people/AcceptInviteStatus'
 import { ProjectsList } from './components/projects/ProjectsList'
 import { ProjectPage } from './components/projects/ProjectPage'
 import { ProjectNav } from './components/projects/ProjectNav'
+import { MyTasksPage } from './components/personal/MyTasksPage'
+import { InboxPage } from './components/personal/InboxPage'
 import { Avatar } from './components/common/Avatar'
 import { TopBar } from './components/layout/TopBar'
 import { CommandPalette } from './components/layout/CommandPalette'
+import { listNotifications } from './lib/notifications'
 import type { Workspace } from '@asanaClone/shared'
 
 const SIDEBAR_COLLAPSED_KEY = 'clearing.sidebarCollapsed'
@@ -67,6 +76,8 @@ interface WorkspaceShellProps {
   onLogout: () => void
 }
 
+type MainView = 'projects' | 'my-tasks' | 'inbox'
+
 function WorkspaceShell({
   workspace,
   userName,
@@ -77,10 +88,33 @@ function WorkspaceShell({
   onLogout,
 }: WorkspaceShellProps) {
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null)
+  const [jumpTaskId, setJumpTaskId] = useState<number | null>(null)
+  const [mainView, setMainView] = useState<MainView>('projects')
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1',
   )
   const [paletteOpen, setPaletteOpen] = useState(false)
+
+  const notificationsQuery = useQuery({
+    queryKey: ['me', 'notifications'],
+    queryFn: listNotifications,
+    refetchInterval: 30000,
+  })
+  const unreadCount = (notificationsQuery.data ?? []).filter((n) => !n.read).length
+
+  function openMainView(view: MainView) {
+    setSelectedProjectId(null)
+    setMainView(view)
+  }
+
+  function handleSelectProject(projectId: number) {
+    setSelectedProjectId(projectId)
+  }
+
+  function handleSelectTask(projectId: number, taskId: number) {
+    setSelectedProjectId(projectId)
+    setJumpTaskId(taskId)
+  }
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -123,6 +157,37 @@ function WorkspaceShell({
 
         <button
           type="button"
+          className={
+            selectedProjectId === null && mainView === 'my-tasks'
+              ? 'app-sidebar__nav-button is-active'
+              : 'app-sidebar__nav-button'
+          }
+          onClick={() => openMainView('my-tasks')}
+          title="My tasks"
+        >
+          <ListChecks size={16} weight="bold" />
+          {!collapsed && <span>My tasks</span>}
+        </button>
+
+        <button
+          type="button"
+          className={
+            selectedProjectId === null && mainView === 'inbox'
+              ? 'app-sidebar__nav-button is-active'
+              : 'app-sidebar__nav-button'
+          }
+          onClick={() => openMainView('inbox')}
+          title="Inbox"
+        >
+          <Bell size={16} weight="bold" />
+          {!collapsed && <span>Inbox</span>}
+          {unreadCount > 0 && (
+            <span className="app-sidebar__badge">{unreadCount > 99 ? '99+' : unreadCount}</span>
+          )}
+        </button>
+
+        <button
+          type="button"
           className="app-sidebar__nav-button"
           onClick={onOpenPeople}
           title="People"
@@ -134,7 +199,7 @@ function WorkspaceShell({
         <ProjectNav
           workspaceId={workspace.id}
           selectedProjectId={selectedProjectId}
-          onSelect={setSelectedProjectId}
+          onSelect={handleSelectProject}
           collapsed={collapsed}
         />
 
