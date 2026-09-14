@@ -9,9 +9,9 @@ import {
 } from "@asanaClone/shared";
 import { db } from "../db";
 import { invites, projectMembers, projects, users, workspaceMembers, workspaces } from "../db/schema";
-import { generateToken } from "../lib/tokens";
-import { sendWorkspaceInviteEmail } from "../lib/mailer";
-import { getMembership } from "../lib/workspaceAccess";
+import { generateToken } from "../infrastructure/tokens";
+import { sendWorkspaceInviteEmail } from "../infrastructure/mailer";
+import { getMembership } from "../policies/workspaceAccess";
 
 const workspaceIdParamsSchema = z.object({ id: z.coerce.number() });
 const inviteTokenParamsSchema = z.object({ token: z.string().min(1) });

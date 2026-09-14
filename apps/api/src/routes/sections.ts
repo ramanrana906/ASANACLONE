@@ -9,7 +9,7 @@ import {
 } from "@asanaClone/shared";
 import { db } from "../db";
 import { sections, taskProjects } from "../db/schema";
-import { requireProjectAccess } from "../lib/projectAccess";
+import { requireProjectAccess } from "../policies/projectAccess";
 
 const projectIdParamsSchema = z.object({ id: z.coerce.number() });
 const sectionIdParamsSchema = z.object({ id: z.coerce.number() });

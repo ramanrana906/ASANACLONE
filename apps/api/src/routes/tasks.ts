@@ -24,11 +24,11 @@ import {
   tasks,
   users,
 } from "../db/schema";
-import { getMembership } from "../lib/workspaceAccess";
-import { requireProjectAccess } from "../lib/projectAccess";
-import { requireTaskAccess } from "../lib/taskAccess";
-import { deleteTaskFully } from "../lib/taskDelete";
-import { createNotification, notifyFollowers } from "../lib/notifications";
+import { getMembership } from "../policies/workspaceAccess";
+import { requireProjectAccess } from "../policies/projectAccess";
+import { requireTaskAccess } from "../policies/taskAccess";
+import { deleteTaskFully } from "../services/taskDelete";
+import { createNotification, notifyFollowers } from "../services/notifications";
 
 const projectIdParamsSchema = z.object({ id: z.coerce.number() });
 const taskIdParamsSchema = z.object({ id: z.coerce.number() });

@@ -4,7 +4,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { createSubtaskSchema, type Subtask } from "@asanaClone/shared";
 import { db } from "../db";
 import { tasks } from "../db/schema";
-import { requireTaskAccess } from "../lib/taskAccess";
+import { requireTaskAccess } from "../policies/taskAccess";
 
 const taskIdParamsSchema = z.object({ id: z.coerce.number() });
 

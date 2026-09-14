@@ -4,8 +4,8 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { createCommentSchema, type Comment } from "@asanaClone/shared";
 import { db } from "../db";
 import { comments, users, workspaceMembers } from "../db/schema";
-import { requireTaskAccess } from "../lib/taskAccess";
-import { createNotification, getTaskFollowerIds } from "../lib/notifications";
+import { requireTaskAccess } from "../policies/taskAccess";
+import { createNotification, getTaskFollowerIds } from "../services/notifications";
 
 const taskIdParamsSchema = z.object({ id: z.coerce.number() });
 

@@ -10,7 +10,7 @@ import {
 } from "@asanaClone/shared";
 import { db } from "../db";
 import { users, workspaceMembers, workspaces } from "../db/schema";
-import { getMembership } from "../lib/workspaceAccess";
+import { getMembership } from "../policies/workspaceAccess";
 
 const workspaceIdParamsSchema = z.object({ id: z.coerce.number() });
 const memberParamsSchema = z.object({ id: z.coerce.number(), userId: z.coerce.number() });

@@ -9,8 +9,8 @@ import {
 } from "@asanaClone/shared";
 import { db } from "../db";
 import { customFields, customFieldValues } from "../db/schema";
-import { requireProjectAccess } from "../lib/projectAccess";
-import { requireTaskAccess } from "../lib/taskAccess";
+import { requireProjectAccess } from "../policies/projectAccess";
+import { requireTaskAccess } from "../policies/taskAccess";
 
 const projectIdParamsSchema = z.object({ id: z.coerce.number() });
 const customFieldIdParamsSchema = z.object({ id: z.coerce.number() });

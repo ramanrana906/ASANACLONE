@@ -20,8 +20,8 @@ import {
   taskProjects,
   users,
 } from "../db/schema";
-import { getMembership } from "../lib/workspaceAccess";
-import { deleteTaskFully } from "../lib/taskDelete";
+import { getMembership } from "../policies/workspaceAccess";
+import { deleteTaskFully } from "../services/taskDelete";
 
 const workspaceIdParamsSchema = z.object({ id: z.coerce.number() });
 const projectIdParamsSchema = z.object({ id: z.coerce.number() });

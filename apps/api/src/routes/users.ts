@@ -4,8 +4,13 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { addEmailSchema, updateProfileSchema, type UserEmail } from "@asanaClone/shared";
 import { db } from "../db";
 import { sessions, userEmails, users, workspaces } from "../db/schema";
-import { toPublicUser } from "../lib/users";
-import { clearSessionCookies, readRefreshToken, revokeAllSessions, revokeOtherSessions } from "../lib/session";
+import { toPublicUser } from "../services/users";
+import {
+  clearSessionCookies,
+  readRefreshToken,
+  revokeAllSessions,
+  revokeOtherSessions,
+} from "../infrastructure/session";
 
 const emailIdParamsSchema = z.object({ id: z.coerce.number() });
 

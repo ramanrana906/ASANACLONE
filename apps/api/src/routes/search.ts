@@ -4,7 +4,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { SearchResults } from "@asanaClone/shared";
 import { db } from "../db";
 import { projects, taskProjects, tasks } from "../db/schema";
-import { getMembership } from "../lib/workspaceAccess";
+import { getMembership } from "../policies/workspaceAccess";
 
 const searchQuerySchema = z.object({
   workspaceId: z.coerce.number(),

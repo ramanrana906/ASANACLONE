@@ -4,8 +4,8 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { addFollowerSchema } from "@asanaClone/shared";
 import { db } from "../db";
 import { taskFollowers } from "../db/schema";
-import { getMembership } from "../lib/workspaceAccess";
-import { requireTaskAccess } from "../lib/taskAccess";
+import { getMembership } from "../policies/workspaceAccess";
+import { requireTaskAccess } from "../policies/taskAccess";
 
 const taskIdParamsSchema = z.object({ id: z.coerce.number() });
 const taskFollowerParamsSchema = z.object({ id: z.coerce.number(), userId: z.coerce.number() });

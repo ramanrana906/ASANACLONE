@@ -10,7 +10,7 @@ import {
   taskProjects,
   tasks,
 } from "../db/schema";
-import { deleteAttachmentFile } from "./attachmentStorage";
+import { deleteAttachmentFile } from "../infrastructure/attachmentStorage";
 
 // Deletes a task and everything hanging off it: subtasks (recursively),
 // comments, activity, attachments (files too), followers, custom field

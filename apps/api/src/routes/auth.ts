@@ -10,15 +10,15 @@ import {
 } from "@asanaClone/shared";
 import { db } from "../db";
 import { users } from "../db/schema";
-import { generateToken, hashToken } from "../lib/tokens";
-import { sendPasswordResetEmail, sendVerificationEmail } from "../lib/mailer";
-import { toPublicUser } from "../lib/users";
+import { generateToken, hashToken } from "../infrastructure/tokens";
+import { sendPasswordResetEmail, sendVerificationEmail } from "../infrastructure/mailer";
+import { toPublicUser } from "../services/users";
 import {
   issueSession,
   clearSessionCookies,
   readRefreshToken,
   revokeSessionByRefreshToken,
-} from "../lib/session";
+} from "../infrastructure/session";
 
 const APP_URL = process.env.APP_URL || "http://localhost:5173";
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;

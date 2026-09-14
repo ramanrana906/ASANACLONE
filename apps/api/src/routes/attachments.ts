@@ -5,8 +5,8 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import type { Attachment } from "@asanaClone/shared";
 import { db } from "../db";
 import { attachments, users } from "../db/schema";
-import { requireTaskAccess } from "../lib/taskAccess";
-import { absoluteAttachmentPath, deleteAttachmentFile, saveUploadedFile } from "../lib/attachmentStorage";
+import { requireTaskAccess } from "../policies/taskAccess";
+import { absoluteAttachmentPath, deleteAttachmentFile, saveUploadedFile } from "../infrastructure/attachmentStorage";
 
 const taskIdParamsSchema = z.object({ id: z.coerce.number() });
 const attachmentIdParamsSchema = z.object({ id: z.coerce.number() });

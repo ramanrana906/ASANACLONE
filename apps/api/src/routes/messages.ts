@@ -4,7 +4,7 @@ import type { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { createMessageSchema, type Message } from "@asanaClone/shared";
 import { db } from "../db";
 import { messages, users } from "../db/schema";
-import { requireProjectAccess } from "../lib/projectAccess";
+import { requireProjectAccess } from "../policies/projectAccess";
 
 const projectIdParamsSchema = z.object({ id: z.coerce.number() });
 
