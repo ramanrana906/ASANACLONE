@@ -14,13 +14,17 @@ import { getMembership } from "../policies/workspaceAccess";
 import { requireProjectAccess } from "../policies/projectAccess";
 import { requireTaskAccess } from "../policies/taskAccess";
 import { deleteTaskFully } from "../services/taskDelete";
-import { createNotification, notifyFollowers } from "../services/notifications";
-import { addFollower, loadTaskDetail, logActivity, renumberSection } from "../services/task";
+import { addFollower, loadTaskDetail, logActivity, renumberSection, createTask, getProjectTasks, moveTask, updateTask } from "../services/taskService";
 
 const projectIdParamsSchema = z.object({ id: z.coerce.number() });
 const taskIdParamsSchema = z.object({ id: z.coerce.number() });
 const taskProjectParamsSchema = z.object({ id: z.coerce.number(), projectId: z.coerce.number() });
 
+async function findSection(sectionId: number, projectId: number) {
+  return db.query.sections.findFirst({
+    where: and(eq(sections.id, sectionId), eq(sections.projectId, projectId)),
+  });
+}
 
 export const tasksRoutes: FastifyPluginAsyncZod = async (app) => {
   app.post(
@@ -32,35 +36,13 @@ export const tasksRoutes: FastifyPluginAsyncZod = async (app) => {
         return reply.status(404).send({ error: "Project not found" });
       }
 
-      const section = await db.query.sections.findFirst({
-        where: and(eq(sections.id, request.body.sectionId), eq(sections.projectId, project.id)),
-      });
+      const section = await findSection(request.body.sectionId, project.id);
       if (!section) {
         return reply.status(400).send({ error: "Section does not belong to that project" });
       }
 
-      const [task] = await db
-        .insert(tasks)
-        .values({ title: request.body.title, createdBy: request.user.sub })
-        .returning();
-
-      const existing = await db
-        .select()
-        .from(taskProjects)
-        .where(and(eq(taskProjects.projectId, project.id), eq(taskProjects.sectionId, section.id)));
-      const nextPosition =
-        existing.length === 0 ? 0 : Math.max(...existing.map((row) => row.position)) + 1;
-
-      await db.insert(taskProjects).values({
-        taskId: task.id,
-        projectId: project.id,
-        sectionId: section.id,
-        position: nextPosition,
-      });
-
-      await addFollower(task.id, request.user.sub);
-
-      return reply.status(201).send(await loadTaskDetail(task.id));
+      const result = await createTask(request.body.title, project.id, section.id,request.user.sub );
+      return reply.status(201).send(result.taskDetails);
     },
   );
 
@@ -72,45 +54,8 @@ export const tasksRoutes: FastifyPluginAsyncZod = async (app) => {
       if (!project) {
         return reply.status(404).send({ error: "Project not found" });
       }
-
-      const rows = await db
-        .select({ link: taskProjects, task: tasks, assignee: users })
-        .from(taskProjects)
-        .innerJoin(tasks, eq(taskProjects.taskId, tasks.id))
-        .leftJoin(users, eq(tasks.assigneeId, users.id))
-        .where(eq(taskProjects.projectId, project.id))
-        .orderBy(asc(taskProjects.position));
-
-      const values = await db
-        .select()
-        .from(customFieldValues)
-        .where(eq(customFieldValues.projectId, project.id));
-      const valuesByTaskId = new Map<number, typeof values>();
-      for (const value of values) {
-        const list = valuesByTaskId.get(value.taskId) ?? [];
-        list.push(value);
-        valuesByTaskId.set(value.taskId, list);
-      }
-
-      const cards: TaskCard[] = rows.map((row) => ({
-        id: row.task.id,
-        title: row.task.title,
-        completed: row.task.completed,
-        dueDateStart: row.task.dueDateStart ? row.task.dueDateStart.toISOString() : null,
-        dueDateEnd: row.task.dueDateEnd ? row.task.dueDateEnd.toISOString() : null,
-        sectionId: row.link.sectionId,
-        position: row.link.position,
-        assignee: row.assignee
-          ? { id: row.assignee.id, name: row.assignee.name, email: row.assignee.email }
-          : null,
-        isMilestone: row.task.isMilestone,
-        customFieldValues: (valuesByTaskId.get(row.task.id) ?? []).map((value) => ({
-          customFieldId: value.customFieldId,
-          value: value.value,
-        })),
-      }));
-
-      return reply.send(cards);
+      const result = await getProjectTasks( project.id);
+      return reply.send(result);
     },
   );
 
@@ -136,97 +81,7 @@ export const tasksRoutes: FastifyPluginAsyncZod = async (app) => {
         return reply.status(404).send({ error: "Task not found" });
       }
 
-      const body = request.body;
-
-      if (body.assigneeId !== undefined && body.assigneeId !== null) {
-        const workspaceIds = access.links.map(({ project }) => project.workspaceId);
-        let assigneeIsMember = false;
-        for (const workspaceId of workspaceIds) {
-          if (await getMembership(workspaceId, body.assigneeId)) {
-            assigneeIsMember = true;
-            break;
-          }
-        }
-        if (!assigneeIsMember) {
-          return reply.status(400).send({ error: "Assignee isn't a member of this task's workspace" });
-        }
-      }
-
-      const before = access.task;
-      const updates: Partial<typeof tasks.$inferInsert> = {};
-      if (body.title !== undefined) updates.title = body.title;
-      if (body.description !== undefined) updates.description = body.description;
-      if (body.assigneeId !== undefined) updates.assigneeId = body.assigneeId;
-      if (body.dueDateStart !== undefined) {
-        updates.dueDateStart = body.dueDateStart ? new Date(body.dueDateStart) : null;
-      }
-      if (body.dueDateEnd !== undefined) {
-        updates.dueDateEnd = body.dueDateEnd ? new Date(body.dueDateEnd) : null;
-      }
-      if (body.completed !== undefined) {
-        updates.completed = body.completed;
-        updates.completedAt = body.completed ? new Date() : null;
-      }
-
-      if (Object.keys(updates).length > 0) {
-        await db.update(tasks).set(updates).where(eq(tasks.id, access.task.id));
-      }
-
-      const primaryProjectId = access.links[0]?.project.id ?? null;
-
-      if (body.assigneeId !== undefined && body.assigneeId !== before.assigneeId) {
-        await logActivity(access.task.id, request.user.sub, "assignee_changed", {
-          from: before.assigneeId,
-          to: body.assigneeId,
-        });
-        if (body.assigneeId !== null) {
-          await addFollower(access.task.id, body.assigneeId);
-          await createNotification({
-            userId: body.assigneeId,
-            type: "assigned",
-            actorId: request.user.sub,
-            taskId: access.task.id,
-            projectId: primaryProjectId,
-          });
-        }
-      }
-
-      const beforeStart = before.dueDateStart ? before.dueDateStart.toISOString() : null;
-      const beforeEnd = before.dueDateEnd ? before.dueDateEnd.toISOString() : null;
-      const afterStart = updates.dueDateStart !== undefined ? body.dueDateStart : undefined;
-      const afterEnd = updates.dueDateEnd !== undefined ? body.dueDateEnd : undefined;
-      if (
-        (afterStart !== undefined && (afterStart || null) !== beforeStart) ||
-        (afterEnd !== undefined && (afterEnd || null) !== beforeEnd)
-      ) {
-        await logActivity(access.task.id, request.user.sub, "due_date_changed", {
-          from: { start: beforeStart, end: beforeEnd },
-          to: {
-            start: afterStart !== undefined ? afterStart || null : beforeStart,
-            end: afterEnd !== undefined ? afterEnd || null : beforeEnd,
-          },
-        });
-        if (primaryProjectId !== null) {
-          await notifyFollowers({
-            taskId: access.task.id,
-            projectId: primaryProjectId,
-            type: "due_date_changed",
-            actorId: request.user.sub,
-          });
-        }
-      }
-
-      if (body.completed !== undefined && body.completed !== before.completed) {
-        await logActivity(access.task.id, request.user.sub, body.completed ? "completed" : "reopened");
-        if (body.completed && primaryProjectId !== null) {
-          await notifyFollowers({
-            taskId: access.task.id,
-            projectId: primaryProjectId,
-            type: "completed",
-            actorId: request.user.sub,
-          });
-        }
-      }
+    await updateTask(access.task.id, request.user.sub, request.body);
 
       return reply.send(await loadTaskDetail(access.task.id));
     },
@@ -261,76 +116,14 @@ export const tasksRoutes: FastifyPluginAsyncZod = async (app) => {
         return reply.status(404).send({ error: "Project not found" });
       }
 
-      const targetSection = await db.query.sections.findFirst({
-        where: and(
-          eq(sections.id, request.body.sectionId),
-          eq(sections.projectId, targetProject.id),
-        ),
-      });
-      if (!targetSection) {
-        return reply.status(400).send({ error: "Section does not belong to that project" });
-      }
+      const result = await moveTask(request.params.id, request.body.projectId, request.body.sectionId, request.body.position, request.user.sub);
+      if (result.error) {
+        return reply.status(400).send({ error: result.error });
+      } 
 
-      const existingLink = await db.query.taskProjects.findFirst({
-        where: and(
-          eq(taskProjects.taskId, access.task.id),
-          eq(taskProjects.projectId, targetProject.id),
-        ),
-      });
-      const oldSectionId = existingLink?.sectionId ?? null;
-      const leavingASection = oldSectionId !== null && oldSectionId !== request.body.sectionId;
+       return reply.send(await loadTaskDetail(access.task.id));
+      
 
-      if (existingLink) {
-        await db
-          .update(taskProjects)
-          .set({ sectionId: request.body.sectionId })
-          .where(eq(taskProjects.id, existingLink.id));
-      } else {
-        await db.insert(taskProjects).values({
-          taskId: access.task.id,
-          projectId: targetProject.id,
-          sectionId: request.body.sectionId,
-          position: 0,
-        });
-      }
-
-      const destRows = await db
-        .select()
-        .from(taskProjects)
-        .where(
-          and(
-            eq(taskProjects.projectId, targetProject.id),
-            eq(taskProjects.sectionId, request.body.sectionId),
-          ),
-        );
-      const others = destRows
-        .filter((row) => row.taskId !== access.task.id)
-        .sort((a, b) => a.position - b.position);
-      const thisRow = destRows.find((row) => row.taskId === access.task.id);
-      if (!thisRow) {
-        return reply.status(500).send({ error: "Failed to place task" });
-      }
-      const clampedIndex = Math.max(0, Math.min(request.body.position, others.length));
-      const ordered = [...others.slice(0, clampedIndex), thisRow, ...others.slice(clampedIndex)];
-
-      await Promise.all(
-        ordered.map((row, index) =>
-          row.position === index
-            ? Promise.resolve()
-            : db.update(taskProjects).set({ position: index }).where(eq(taskProjects.id, row.id)),
-        ),
-      );
-
-      if (leavingASection && oldSectionId !== null) {
-        await renumberSection(targetProject.id, oldSectionId);
-        await logActivity(access.task.id, request.user.sub, "section_changed", {
-          projectId: targetProject.id,
-          from: oldSectionId,
-          to: request.body.sectionId,
-        });
-      }
-
-      return reply.send(await loadTaskDetail(access.task.id));
     },
   );
 
